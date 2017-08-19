@@ -465,12 +465,17 @@ void extractMatchFeaturePoints(char* featureName, char* name1, char* name2, vect
 	pts1.clear();
 	pts2.clear();
 
+	
+#ifndef _CV_VERSION_3
 	//在执行提取特征向量函数之前，必须执行该函数~！！
-	initModule_nonfree();
-	initModule_features2d();
-	printf("featurename: %s\n",featureName);
-	float sc = scale;
-	printf("scale: %f\n",sc);
+	initModule_nonfree ();
+	initModule_features2d ();
+#endif // ! _CV_VERSION_3
+
+	cout << "Feature name:" << featureName << endl;
+	float sc = static_cast<float>(scale);
+	cout << "Scale:" << sc << endl;
+	
 	Mat img1 = imread(string(name1),0);
 	Mat img2 = imread(string(name2),0);
 	
@@ -481,35 +486,48 @@ void extractMatchFeaturePoints(char* featureName, char* name1, char* name2, vect
 	//detect keypoints
 	vector<KeyPoint> kpts1,kpts2;
 	Mat dsp1,dsp2;
-	if(0 == strcmp(featureName,"BRISK")){
-		cv::BRISK brk(30,3,1.0F); 
-		brk.create("Feature2D.BRISK");
-		brk.detect(img1,kpts1);
-		unique_keypoint(kpts1);
-		brk.compute(img1,kpts1,dsp1);
-		brk.detect(img2,kpts2);
-		unique_keypoint(kpts2);
-		brk.compute(img2,kpts2,dsp2);	
-	}else if(0 == strcmp(featureName,"FAST")){
-		FastFeatureDetector *ft = new FastFeatureDetector(40,true);
-		ft->detect(img1,kpts1);
-		ft->detect(img2,kpts2);	
-		FREAK fe;
-		unique_keypoint(kpts1);
-		unique_keypoint(kpts2);
-		fe.compute(img1,kpts1,dsp1);
-		fe.compute(img2,kpts2,dsp2);
-	}else{    //SIFT
-		Ptr<FeatureDetector> fd= FeatureDetector::create("SIFT");	
-		fd->detect(img1,kpts1);
-		fd->detect(img2,kpts2);
-		unique_keypoint(kpts1);
-		unique_keypoint(kpts2);
-		Ptr<DescriptorExtractor> de = DescriptorExtractor::create(featureName);
-		de->compute(img1,kpts1,dsp1);
-		de->compute(img2,kpts2,dsp2);
+
+	Ptr<FeatureDetector> fd;
+	Ptr<DescriptorExtractor> de;
+
+#ifdef _CV_VERSION_3
+	if ( 0 == strcmp ( featureName, "BRISK" ) ) {
+		fd = de = BRISK::create ( 30, 3, 1.0F ); // These are now the default values
 	}
-	printf("keypoints number: %d %d\n", kpts1.size(), kpts2.size());
+	else if ( 0 == strcmp ( featureName, "FAST" ) ) {
+		fd = FastFeatureDetector::create ( 40, true ); // it is not default 10
+		de = xfeatures2d::FREAK::create ();
+	}
+	else {    //SIFT
+		fd = de = xfeatures2d::SIFT::create ();
+	}
+#else
+	if ( 0 == strcmp ( featureName, "BRISK" ) ) {
+		fd = de = new BRISK ( 30, 3, 1.0F ); // These are now the default values
+	}
+	else if ( 0 == strcmp ( featureName, "FAST" ) ) {
+		fd = new FastFeatureDetector ( 40, true ); // it is not default 10
+		de = new FREAK ();
+	}
+	else {    //SIFT
+		fd = de = new SIFT ();
+	}
+#endif // _CV_VERSION_3
+
+
+
+
+	fd->detect ( img1, kpts1 );
+	fd->detect ( img2, kpts2 );
+
+	unique_keypoint ( kpts1 );
+	unique_keypoint ( kpts2 );
+
+	de->compute ( img1, kpts1, dsp1 );
+	de->compute ( img2, kpts2, dsp2 );
+
+	// printf("keypoints number: %d %d\n", kpts1.size(), kpts2.size());
+	cout << "keypoints number. kpts1.size ():" << kpts1.size () << ", kpts2.size ():" << kpts2.size () << endl;
 
 	//match keypoints
 	Ptr<DescriptorMatcher> dm;
@@ -517,16 +535,17 @@ void extractMatchFeaturePoints(char* featureName, char* name1, char* name2, vect
 		dm= DescriptorMatcher::create("BruteForce");
 	else 
 		dm= DescriptorMatcher::create("BruteForce-Hamming");
+
 	vector<vector<DMatch>> mh;
 	dm->knnMatch(dsp1,dsp2,mh,2);
-	Point2f p1,p2;
-	long long pts_num = mh.size();
-	vector<DMatch> mt;
-	for(int i=0;i<pts_num;i++){
+
+	//vector<DMatch> mt;
+
+	for ( int i = 0; i < mh.size (); i++ ) {
 		double ratio = mh[i][0].distance / mh[i][1].distance;
 		if(ratio < max_ratio ){
-			p1=kpts1[mh[i][0].queryIdx].pt;
-			p2=kpts2[mh[i][0].trainIdx].pt;
+			Point2f p1 = kpts1[mh[i][0].queryIdx].pt;
+			Point2f p2 = kpts2[mh[i][0].trainIdx].pt;
 			p1.x/=sc;
 			p1.y/=sc;
 			p2.x/=sc;
@@ -535,7 +554,8 @@ void extractMatchFeaturePoints(char* featureName, char* name1, char* name2, vect
 			pts2.push_back(p2);
 		}
 	}
-	printf("matched points number: %d\n",pts1.size());
+
+	cout << "matched points number:" << pts1.size () << endl;
 
 }
 
@@ -551,11 +571,11 @@ void extractMatchFeaturePoints(char* featureName, char* name1, char* name2, vect
 //-----------------------------------------------------------
 void unique_keypoint(vector<KeyPoint> &points){
 	const int kHashDiv = 10000;
-	bool hash_list[kHashDiv]={0};
-	int kpsize = points.size();
-	int i,j;
+	bool hash_list[kHashDiv]={false};
+	size_t kpsize = points.size();
+	size_t i,j;
 	for(i=0,j=0;i<kpsize;i++){
-		int hash_v = (int)(points[i].pt.x * points[i].pt.y)%kHashDiv;
+		int hash_v = static_cast<int>(points[i].pt.x * points[i].pt.y)%kHashDiv;
 		if(!hash_list[hash_v]){
 			hash_list[hash_v]=true;
 			points[j]=points[i];
@@ -583,13 +603,13 @@ void matchPointsRansac(vector<Point2f> &pts1,vector<Point2f> &pts2)
 		return;
 	}
 	Mat mask;
-	int cnt = pts1.size();
+	size_t cnt = pts1.size();
 	threshold = 1200.0 / cnt;
 	Mat fMat = findFundamentalMat(pts1,pts2,CV_FM_RANSAC,threshold,0.99,mask);
 	vector<Point2f> pts1_,pts2_;
-	int pts_num=pts1.size();
+	size_t pts_num=pts1.size();
 	for(int i=0;i<pts_num;i++){
-		int flag = (int)mask.at<uchar>(i);
+		int flag = static_cast<int>(mask.at<uchar>(i));
 		if(flag){
 			pts1_.push_back(pts1[i]);
 			pts2_.push_back(pts2[i]);
@@ -601,7 +621,7 @@ void matchPointsRansac(vector<Point2f> &pts1,vector<Point2f> &pts2)
 	//根据单应矩阵来筛点
 	Mat hMat = findHomography(pts1,pts2,CV_RANSAC,3.0);
 
-	printf("matched points number after ransac: %d\n", pts1.size());
+	cout << "Matched points number after RANSAC:" << pts1.size () << endl;
 }
 
 
@@ -610,7 +630,7 @@ bool calculateRT(vector<Point2f> vpts1, vector<Point2f> vpts2, double K[9],
 	double &move_x,double &move_y,double &move_z, int ptsLimit)
 {
 
-	int matchNum = vpts1.size();
+	int matchNum = static_cast<int>(vpts1.size());
 	cout<<"matched points number: "<<matchNum<<endl;
 	//ofstream matchLog("match_num.txt");
 	//matchLog<<img1<<" "<<img2<<" "<<matchNum<<endl;
@@ -618,8 +638,8 @@ bool calculateRT(vector<Point2f> vpts1, vector<Point2f> vpts2, double K[9],
 	if(matchNum < 5) return false;
 	int maxNum = matchNum < ptsLimit ? matchNum : ptsLimit;
 
-	double *pts1 = (double *)malloc(sizeof(double)*maxNum*2);
-	double *pts2 = (double *)malloc(sizeof(double)*maxNum*2);
+	double *pts1 = static_cast<double *>(malloc(sizeof(double) * maxNum * 2));
+	double *pts2 = static_cast<double *>(malloc(sizeof(double) * maxNum * 2));
 
 	for(int i=0;i<matchNum;i++){
 		if(i < maxNum){
@@ -628,7 +648,7 @@ bool calculateRT(vector<Point2f> vpts1, vector<Point2f> vpts2, double K[9],
 			pts2[i*2] = vpts2[i].x;
 			pts2[i*2+1] = vpts2[i].y;
 		}else{
-			srand((int)time(0));
+			srand(static_cast<int>(time(0)));
 			int dj = rand()%i;
 			if(dj<maxNum){
 				pts1[dj*2] = vpts1[i].x;
@@ -659,9 +679,9 @@ bool calculateRT(vector<Point2f> vpts1, vector<Point2f> vpts2, double K[9],
 	//cout<<ret<<endl;
 	free(pts1);
 	free(pts2);
-	pts1=pts2=nullptr;
+	//pts1=pts2=nullptr;
 
-	int best_index = -1;
+	size_t best_index = -1;
     if(ret) {
         for(size_t i=0; i < E.size(); i++) {
             if(cv::determinant(P[i](cv::Range(0,3), cv::Range(0,3))) < 0) P[i] = -P[i];
@@ -681,6 +701,9 @@ bool calculateRT(vector<Point2f> vpts1, vector<Point2f> vpts2, double K[9],
 
 	cout << "Best Ematrix:" << endl;
 	cout << Ematrix << endl;
+
+	Ematrix /= Ematrix.at<double> ( 2, 2 );
+	cout << "Scaled E:" << endl << Ematrix << endl;
 
 	Mat R = p_mat.colRange ( 0, 3 );
 	Mat t = p_mat.colRange ( 3, 4 );

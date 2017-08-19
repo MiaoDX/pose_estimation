@@ -1,11 +1,6 @@
 #include <iostream>
-#include <time.h>
-#include <io.h>
-#include <stdlib.h>
-#include <direct.h>
-#include <string.h>
+#include <vector>
 #include <string>
-#include <stdio.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <iomanip>
@@ -25,6 +20,7 @@
 
 
 using namespace cv;
+using namespace std;
 //typedef unsigned char BYTE;
 //#define EXPORT_DEF  _declspec(dllexport)
 

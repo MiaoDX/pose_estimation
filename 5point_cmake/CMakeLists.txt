@@ -2,7 +2,7 @@ project(relative-pose-5-pint)
 
 cmake_minimum_required(VERSION 2.8)
 
-# include( $ENV{OpenCV2_DIR}/OpenCVConfig.cmake )
+#include( $ENV{OpenCV2_DIR}/OpenCVConfig.cmake )
 include( $ENV{OpenCV3_DIR}/OpenCVConfig.cmake )
 add_definitions(-D_CV_VERSION_3) # `#ifdef _CV_VERSION_3` in timeutil.h
 
