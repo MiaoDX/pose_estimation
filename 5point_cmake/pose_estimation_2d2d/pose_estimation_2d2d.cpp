@@ -11,8 +11,15 @@ void find_feature_matches ( const Mat& img_1, const Mat& img_2,
 {
     //-- 初始化
     Mat descriptors_1, descriptors_2;
+#ifdef _CV_VERSION_3
     // used in OpenCV3 
     Ptr<FeatureDetector> detector = ORB::create ();
+#else
+    initModule_nonfree ();
+    initModule_features2d ();
+    Ptr<FeatureDetector> detector = new ORB ();
+#endif
+
     //-- 第一步:检测 Oriented FAST 角点位置
     detector->detect ( img_1, keypoints_1 );
     detector->detect ( img_2, keypoints_2 );
@@ -37,11 +44,15 @@ void find_feature_matches_from_keypoints (
 {
     //-- 初始化
     Mat descriptors_1, descriptors_2;
+#if _CV_VERSION_3
     // used in OpenCV3 
     Ptr<DescriptorExtractor> descriptor = ORB::create ();
-    // use this if you are in OpenCV2 
-    // Ptr<FeatureDetector> detector = FeatureDetector::create ( "ORB" );
-    // Ptr<DescriptorExtractor> descriptor = DescriptorExtractor::create ( "ORB" );
+    
+#else
+    Ptr<DescriptorExtractor> descriptor = new ORB ();
+
+#endif
+
     Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create ( "BruteForce-Hamming" );
 
     //-- 第二步:根据角点位置计算 BRIEF 描述子

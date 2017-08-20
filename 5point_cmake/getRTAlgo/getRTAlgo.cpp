@@ -74,15 +74,15 @@ void extractMatchFeaturePoints ( string featurename, string imagename1, string i
 		fd = de = xfeatures2d::SIFT::create ();
 	}
 #else
-	if ( featurename == "BRISK" ) ) {
+	if ( featurename == "BRISK"  ) {
 		fd = de = new BRISK ( 30, 3, 1.0F ); // These are now the default values
 	}
-	else if ( featurename == "FAST" ) ) {
+	else if ( featurename == "FAST"  ) {
 		fd = new FastFeatureDetector ( 40, true ); // it is not default 10
 		de = new FREAK ();
 	}
 	else {    //SIFT
-		fd = de = new SIFT ();
+		fd = de = new SIFT ();        
 	}
 #endif // _CV_VERSION_3
 
@@ -389,6 +389,12 @@ void rotate_angle ( const Mat& R )
 
 void DEBUG_RT ( const Mat& R, const Mat& t )
 {
+    if(R.empty() )
+    {
+        cout << "Seems R is empty in DEBUG_RT, just return." << endl;
+        return;
+    }
+
     Mat r;
     cv::Rodrigues ( R, r ); // r为旋转向量形式，用Rodrigues公式转换为矩阵
 
@@ -406,6 +412,7 @@ void calculateRT_CV3 (
 {
     assert ( points1.size () > 0 && points1.size () == points2.size () && K.size () == Size ( 3, 3 ) );
     R.release (); t.release ();
+   
 
 
     //-- 计算基础矩阵
@@ -419,9 +426,9 @@ void calculateRT_CV3 (
     cout << "Scaled E:" << endl << E_f_F_scaled << endl;
 
 #ifndef _CV_VERSION_3
-    cout << "Seems we are not using OpenCV 3.x, so we can not findEssentialMat, just return" << endl;
+    cout << "Seems we are not using OpenCV 3.x, so no findEssentialMat, just return." << endl;
     return;
-#endif
+#else
 
     //-- 计算本质矩阵
     Mat E = findEssentialMat ( points1, points2, K );
@@ -443,6 +450,7 @@ void calculateRT_CV3 (
 
     //-- 从本质矩阵中恢复旋转和平移信息.
     recoverPose ( E, points1, points2, K, R, t );
+#endif
 }
 
 

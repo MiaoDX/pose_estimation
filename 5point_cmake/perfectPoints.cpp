@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <opencv2/opencv.hpp>
 #include <iostream>
-
+#include <ctime>
 #include "getRTAlgo.h"
 
 using namespace cv;
@@ -127,7 +127,7 @@ int main()
     recoverPose(E, x1s, x2s, K, R, t);
     DEBUG_RT ( R, t );
 #else
-    cout << "Seems we are not using OpenCV 3.x, so no findEssentialMat" << endl;
+    cout << "Seems we are not using OpenCV 3.x, so no findEssentialMat." << endl;
 #endif
 
 
