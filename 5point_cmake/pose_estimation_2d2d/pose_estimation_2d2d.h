@@ -16,6 +16,9 @@
 using namespace std;
 using namespace cv;
 
+
+void calcuateRT_test ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K, double* K_arr );
+
 void find_feature_matches (
     const Mat& img_1, const Mat& img_2,
     std::vector<KeyPoint>& keypoints_1,
@@ -45,10 +48,3 @@ void essentialFromFundamental ( const Mat &F,
 
 // 像素坐标转相机归一化坐标
 Point2f pixel2cam ( const Point2f& p, const Mat& K );
-
-void kp2pts ( const std::vector<KeyPoint>& keypoints_1,
-    const std::vector<KeyPoint>& keypoints_2,
-    const std::vector< DMatch >& matches,
-    vector<Point2f>& points1,
-    vector<Point2f>& points2
-);

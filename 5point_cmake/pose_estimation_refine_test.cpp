@@ -5,9 +5,6 @@ using namespace std;
 using namespace cv;
 
 
-
-
-
 int main ( int argc, char** argv )
 {
     // Command Arguments : H:/projects/SLAM/python_code/dataset/our/trajs2/1.jpg H:/projects/SLAM/python_code/dataset/our/trajs2/4.jpg
@@ -37,8 +34,13 @@ int main ( int argc, char** argv )
 
 
     calcuateRT_test ( keypoints_1_all, keypoints_2_all, matches, K, K_arr );
+    
+    
+    refineMatcheswithHomography ( keypoints_1_all, keypoints_2_all, matches );
+    calcuateRT_test ( keypoints_1_all, keypoints_2_all, matches, K, K_arr );
 
-
+    refineMatchesWithFundmentalMatrix ( keypoints_1_all, keypoints_2_all, matches );
+    calcuateRT_test ( keypoints_1_all, keypoints_2_all, matches, K, K_arr );
 
     system ( "pause" );
 

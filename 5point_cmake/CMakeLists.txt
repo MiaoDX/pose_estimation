@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 
 include( $ENV{OpenCV2_DIR}/OpenCVConfig.cmake )
 #include( $ENV{OpenCV3_DIR}/OpenCVConfig.cmake )
-#add_definitions(-D_CV_VERSION_3) # `#ifdef _CV_VERSION_3` in timeutil.h
+#add_definitions(-D_CV_VERSION_3) # `#ifdef _CV_VERSION_3`
 
 message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
 message(STATUS "OpenCV_LIBS: ${OpenCV_LIBS}")
@@ -35,3 +35,5 @@ add_executable(pose_estimation_test pose_estimation_test.cpp ${FIVE_POINT_AND_2D
 target_link_libraries(pose_estimation_test ${OpenCV_LIBS})
 
 
+add_executable(pose_estimation_refine_test pose_estimation_refine_test.cpp ${FIVE_POINT_AND_2D2D_CPP_FILES})
+target_link_libraries(pose_estimation_refine_test ${OpenCV_LIBS})

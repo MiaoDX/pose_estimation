@@ -4,6 +4,8 @@
 using namespace std;
 using namespace cv;
 
+#define ORB_NFEATURES 1000
+
 void find_feature_matches ( const Mat& img_1, const Mat& img_2,
     std::vector<KeyPoint>& keypoints_1,
     std::vector<KeyPoint>& keypoints_2,
@@ -13,23 +15,16 @@ void find_feature_matches ( const Mat& img_1, const Mat& img_2,
     Mat descriptors_1, descriptors_2;
 #ifdef _CV_VERSION_3
     // used in OpenCV3 
-    Ptr<FeatureDetector> detector = ORB::create ();
+    Ptr<FeatureDetector> detector = ORB::create ( ORB_NFEATURES );
 #else
     initModule_nonfree ();
     initModule_features2d ();
-    Ptr<FeatureDetector> detector = new ORB ();
+    Ptr<FeatureDetector> detector = new ORB ( ORB_NFEATURES );
 #endif
 
     //-- 第一步:检测 Oriented FAST 角点位置
     detector->detect ( img_1, keypoints_1 );
     detector->detect ( img_2, keypoints_2 );
-
-	/*
-	for ( int i = 0; i < 10; i++ ) {
-		Point2d p2 = keypoints_1[i].pt;
-		cout << p2.x << " " << p2.y << endl;
-	}
-	*/
 
     find_feature_matches_from_keypoints ( img_1, img_2, keypoints_1, keypoints_2, matches );
 }
@@ -46,14 +41,15 @@ void find_feature_matches_from_keypoints (
     Mat descriptors_1, descriptors_2;
 #if _CV_VERSION_3
     // used in OpenCV3 
-    Ptr<DescriptorExtractor> descriptor = ORB::create ();
+    Ptr<DescriptorExtractor> descriptor = ORB::create ( ORB_NFEATURES );
     
 #else
-    Ptr<DescriptorExtractor> descriptor = new ORB ();
+    Ptr<DescriptorExtractor> descriptor = new ORB ( ORB_NFEATURES );
 
 #endif
 
-    Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create ( "BruteForce-Hamming" );
+    //Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create ( "BruteForce-Hamming" );
+    Ptr<DescriptorMatcher> matcher = new BFMatcher ( NORM_HAMMING , true);
 
     //-- 第二步:根据角点位置计算 BRIEF 描述子
     descriptor->compute ( img_1, keypoints_1, descriptors_1 );
@@ -68,7 +64,7 @@ void find_feature_matches_from_keypoints (
     double min_dist = 10000, max_dist = 0;
 
     //找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离
-    for ( int i = 0; i < descriptors_1.rows; i++ )
+    for ( int i = 0; i < match.size(); i++ )
     {
         double dist = match[i].distance;
         if ( dist < min_dist ) min_dist = dist;
@@ -79,7 +75,7 @@ void find_feature_matches_from_keypoints (
     printf ( "-- Min dist : %f \n", min_dist );
 
     //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
-    for ( int i = 0; i < descriptors_1.rows; i++ )
+    for ( int i = 0; i < match.size (); i++ )
     {
         if ( match[i].distance <= max ( 2 * min_dist, 30.0 ) )
         {
@@ -126,13 +122,8 @@ void DebugMatchedKeyPoints (
     drawMatches ( img_1, keypoints_1, img_2, keypoints_2, matches, img_match );
     cout << "-- All match num :" << matches.size () << endl;
     
-    resize_and_show ( img_match, 320, "All matches" );
-
-    
+    resize_and_show ( img_match, 320, "All matches" );    
 }
-
-
-
 
 
 Point2f pixel2cam ( const Point2f& p, const Mat& K )
@@ -146,30 +137,18 @@ Point2f pixel2cam ( const Point2f& p, const Mat& K )
 }
 
 
-void kp2pts ( const std::vector<KeyPoint>& keypoints_1,
-    const std::vector<KeyPoint>& keypoints_2,
-    const std::vector< DMatch >& matches,
-    vector<Point2f>& points1,
-    vector<Point2f>& points2
-)
+
+
+void calcuateRT_test ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K, double* K_arr )
 {
-    //-- 把匹配点转换为vector<Point2f>的形式
+    Mat R, t;
+    vector<Point2f> points1, points2;
+    kp2pts ( kps1, kps2, matches, points1, points2 );
+    print_pts ( points1, points2, 0, 10 );
+    calculateRT_CV3 ( points1, points2, K, R, t );
+    DEBUG_RT ( R, t );
 
-    for ( auto m : matches )
-    {
-        points1.push_back ( keypoints_1[m.queryIdx].pt );
-        points2.push_back ( keypoints_2[m.trainIdx].pt );
-    }
-
-    /*
-    for ( int i = 0; i < points1.size(); i++ ) {
-    Point2d p1 = points1[i];
-    Point2d p2 = points2[i];
-    cout << "i:" << i << endl;
-    cout << "p1:" << p1.x << " " << p1.y << endl;
-    cout << "p2:" << p2.x << " " << p2.y << endl;
-    }
-    */
+    Mat R_5, t_5;
+    calculateRT_5points ( points1, points2, K_arr, R_5, t_5, points1.size () );
+    DEBUG_RT ( R_5, t_5 );
 }
-
-
