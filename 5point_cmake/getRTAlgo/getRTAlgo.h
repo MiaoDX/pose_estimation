@@ -55,21 +55,22 @@ void unique_keypoint(vector<KeyPoint> &points);
 
 void matchPointsRansac(vector<Point2f> &pts1,vector<Point2f> &pts2);
 
-bool calculateRT_5points ( const vector<Point2f> vpts1, const vector<Point2f> vpts2, double K[9], Mat& R, Mat& t, int ptsLimit, bool showAll = true );
 
-bool calculateRT_5points (vector<Point2f> pts1,vector<Point2f> pts2, double K[9],
+bool calculateRT_5points ( const vector<Point2f>& vpts1, const vector<Point2f>& vpts2, const Mat& K, Mat& R, Mat& t, int ptsLimit, bool withDebug = true );
+
+
+bool calculateRT_5points ( const vector<Point2f>& pts1, const vector<Point2f>& pts2, double K[9],
 	double &rotate_x,double &rotate_y,double &rotate_z, 
 	double &move_x,double &move_y,double &move_z, int ptsLimit = 3000);
+
+
 
 void calculateRT_CV3 (
     const vector<Point2f> points1,
     const vector<Point2f> points2,
     const Mat K,
-    Mat& R, Mat& t );
-
-void getInvK(double invk[9],double K[9]);
-
-void transformPoint(double H[9],double &x,double &y);
+    Mat& R, Mat& t,
+    bool withDebug = true);
 
 void resize_and_show ( const Mat& im, int target_height = 640, string name = "Image" );
 
@@ -96,3 +97,7 @@ void print_pts ( vector<Point2f>& points1,
     vector<Point2f>& points2,
     int start,
     int end );
+
+// 像素坐标转相机归一化坐标
+Point2f pixel2cam ( const Point2f& p, const Mat& K );
+void pixel2cam ( const double px, const double py, const Mat& K, double& cx, double& cy );

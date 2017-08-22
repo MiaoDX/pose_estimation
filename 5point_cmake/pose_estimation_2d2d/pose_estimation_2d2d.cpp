@@ -126,20 +126,10 @@ void DebugMatchedKeyPoints (
 }
 
 
-Point2f pixel2cam ( const Point2f& p, const Mat& K )
-{
-	//[1、像素坐标与像平面坐标系之间的关系 ](http://blog.csdn.net/waeceo/article/details/50580607)
-    return Point2f
-    (
-        (p.x - K.at<double> ( 0, 2 )) / K.at<double> ( 0, 0 ),
-        (p.y - K.at<double> ( 1, 2 )) / K.at<double> ( 1, 1 )
-    );
-}
 
 
 
-
-void calcuateRT_test ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K, double* K_arr )
+void calcuateRT_test ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K)
 {
     Mat R, t;
     vector<Point2f> points1, points2;
@@ -149,6 +139,6 @@ void calcuateRT_test ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2,
     DEBUG_RT ( R, t );
 
     Mat R_5, t_5;
-    calculateRT_5points ( points1, points2, K_arr, R_5, t_5, points1.size () );
+    calculateRT_5points ( points1, points2, K, R_5, t_5, points1.size () );
     DEBUG_RT ( R_5, t_5 );
 }

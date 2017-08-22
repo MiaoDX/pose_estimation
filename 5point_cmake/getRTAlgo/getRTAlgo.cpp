@@ -356,74 +356,54 @@ void matchPointsRansac(vector<Point2f> &pts1,vector<Point2f> &pts2)
 
 
 
-bool calculateRT_5points (const vector<Point2f> vpts1, const vector<Point2f> vpts2, double K[9], Mat& R, Mat& t, int ptsLimit, bool showAll)
+bool calculateRT_5points ( const vector<Point2f>& vpts1, const vector<Point2f>& vpts2, const Mat& K, Mat& R, Mat& t, int ptsLimit, bool withDebug )
 {
-    int matchNum = static_cast<int>(vpts1.size ());
-    cout << "matched points number: " << matchNum << endl;
+    int npts = static_cast<int>(vpts1.size ());
+    if ( npts < 5 ) return false;
+    int chosenNum = min ( npts, ptsLimit );
 
-    if ( matchNum < 5 ) return false;
-    int maxNum = matchNum < ptsLimit ? matchNum : ptsLimit;
-
-    double *pts1 = static_cast<double *>(malloc ( sizeof ( double ) * maxNum * 2 ));
-    double *pts2 = static_cast<double *>(malloc ( sizeof ( double ) * maxNum * 2 ));
-
-    /*
-    for ( int i = 0; i < matchNum; i++ ) {
-        if ( i < maxNum ) {
-            pts1[i * 2] = vpts1[i].x;
-            pts1[i * 2 + 1] = vpts1[i].y;
-            pts2[i * 2] = vpts2[i].x;
-            pts2[i * 2 + 1] = vpts2[i].y;
-        }
-        else {
-            srand ( static_cast<int>(time ( 0 )) );
-            int dj = rand () % i;
-            if ( dj < maxNum ) {
-                pts1[dj * 2] = vpts1[i].x;
-                pts1[dj * 2 + 1] = vpts1[i].y;
-                pts2[dj * 2] = vpts2[i].x;
-                pts2[dj * 2 + 1] = vpts2[i].y;
-            }
-        }
+    if (withDebug)
+    {
+        cout << "In calculateRT_5points, num of points: " << npts << ",chosenNum:" << chosenNum << endl;
     }
-    */
+    
 
-    for ( int i = 0; i < matchNum; i++ ) {
-        pts1[i * 2] = vpts1[i].x;
-        pts1[i * 2 + 1] = vpts1[i].y;
-        pts2[i * 2] = vpts2[i].x;
-        pts2[i * 2 + 1] = vpts2[i].y;
+
+    //pixel2cam
+    vector<double> _pts1_cam, _pts2_cam;
+    _pts1_cam.resize ( chosenNum * 2 ); _pts2_cam.resize ( chosenNum * 2 );
+
+    for(int i = 0; i < chosenNum; i++ )
+    {
+        pixel2cam ( vpts1[i].x, vpts1[i].y, K, _pts1_cam[i * 2], _pts1_cam[i * 2 + 1] );
+        pixel2cam ( vpts2[i].x, vpts2[i].y, K, _pts2_cam[i * 2], _pts2_cam[i * 2 + 1] );
+        //printf("(%g, %g) -> (%g, %g)\n", vpts1[i].x, vpts1[i].y, _pts1_cam[2*i], _pts1_cam[2*i+1]);
+        //printf ( "(%g, %g) -> (%g, %g)\n", vpts2[i].x, vpts2[i].y, _pts2_cam[2 * i], _pts2_cam[2 * i + 1] );
     }
 
-    matchNum = maxNum;
-    double invk[9];
-    getInvK ( invk, K );
 
-
-    for ( int i = 0; i < matchNum; i++ ) {
-        transformPoint ( invk, pts1[i * 2], pts1[i * 2 + 1] );
-        transformPoint ( invk, pts2[i * 2], pts2[i * 2 + 1] );
-    }
     vector <cv::Mat> E; // essential matrix
     vector <cv::Mat> P;
     vector<int> inliers;
 
-    bool ret = Solve5PointEssential ( pts1, pts2, matchNum, E, P, inliers ); // 从4个解得到1个最优解；P：映射矩阵 [R|t]
-    //cout<<ret<<endl;
-    free ( pts1 );
-    free ( pts2 );
-    //pts1=pts2=nullptr;
+    bool ret = Solve5PointEssential ( _pts1_cam.data(), _pts2_cam.data(), chosenNum, E, P, inliers ); // 从4个解得到1个最优解；P：映射矩阵 [R|t]
 
-
-    cout << "============== Solve5PointEssential =============" << endl;
+    if (withDebug)
+    {
+        cout << "============== Solve5PointEssential =============" << endl;
+        printf ( "Solve5PointEssential() found %d solutions:\n", E.size () );
+    }
+    
     size_t best_index = -1;
     if ( ret ) {
         for ( size_t i = 0; i < E.size (); i++ ) {
             if ( cv::determinant ( P[i] ( cv::Range ( 0, 3 ), cv::Range ( 0, 3 ) ) ) < 0 ) P[i] = -P[i];
-            if(showAll )
+            
+            if( withDebug )
             {
                 R = P[i].colRange ( 0, 3 );
                 t = P[i].colRange ( 3, 4 );
+                printf ( "%d/%d : %d/%d\t", i, E.size(), inliers[i], npts );
                 DEBUG_RT ( R, t );
             }
             
@@ -434,9 +414,11 @@ bool calculateRT_5points (const vector<Point2f> vpts1, const vector<Point2f> vpt
         cout << "Could not find a valid essential matrix" << endl;
         return false;
     }
-    cout << "============== Solve5PointEssential =============" << endl;
-    
-    //cout<<"best index:"<<best_index<<endl;
+    if (withDebug)
+    {
+        cout << "============== Solve5PointEssential =============" << endl;
+    }
+
     cv::Mat p_mat = P[best_index];
     cv::Mat Ematrix = E[best_index];
 
@@ -447,14 +429,15 @@ bool calculateRT_5points (const vector<Point2f> vpts1, const vector<Point2f> vpt
 }
 
 
-bool calculateRT_5points (vector<Point2f> vpts1, vector<Point2f> vpts2, double K[9],
-	double &rotate_x,double &rotate_y,double &rotate_z, 
-	double &move_x,double &move_y,double &move_z, int ptsLimit)
+bool calculateRT_5points ( const vector<Point2f>& pts1, const vector<Point2f>& pts2, double K[9],
+    double &rotate_x, double &rotate_y, double &rotate_z,
+    double &move_x, double &move_y, double &move_z, int ptsLimit)
 {
 
 
     Mat R, t;
-    calculateRT_5points ( vpts1, vpts2, K, R, t, ptsLimit, true );
+    Mat k_M ( 3, 3, CV_64FC1, K );
+    calculateRT_5points ( pts1, pts2, k_M, R, t, ptsLimit, true );
 
 	double rot_x,rot_y,rot_z;
 	rot_y = asin(R.at<double>(2,0));
@@ -470,33 +453,6 @@ bool calculateRT_5points (vector<Point2f> vpts1, vector<Point2f> vpts2, double K
 	
     return true;
 }
-
-
-void getInvK(double invk[9],double K[9]){
-	Mat kmat(3,3,CV_64FC1,K);
-	Mat invkmat = kmat.inv();
-	for(int i=0;i<3;i++){
-		for(int j=0;j<3;j++){
-			invk[i*3+j]=invkmat.at<double>(i,j);
-		}
-	}
-}
-
-
-void transformPoint(double H[9],double &x,double &y){
-	double v[3] = {x,y,1};
-	double res[3]={0};
-	for(int i=0;i<3;i++){
-		for(int j=0;j<3;j++){
-			res[i] += v[j] * H[i*3+j];
-		}
-	}
-	if(abs(res[2]) > 1e-7){
-		x = res[0]/res[2];
-		y = res[1]/res[2];
-	}
-}
-
 
 void resize_and_show ( const Mat& im, int target_height, string name )
 {
@@ -566,23 +522,11 @@ void calculateRT_CV3 (
     const vector<Point2f> points1,
     const vector<Point2f> points2,
     const Mat K,
-    Mat& R, Mat& t )
+    Mat& R, Mat& t,
+    bool withDebug)
 {
     assert ( points1.size () > 0 && points1.size () == points2.size () && K.size () == Size ( 3, 3 ) );
     R.release (); t.release ();
-   
-
-    
-    //-- 计算基础矩阵
-    Mat fundamental_matrix = findFundamentalMat ( points1, points2, CV_RANSAC, 0.1, 0.99 );
-    //cout << "fundamental_matrix is " << endl << fundamental_matrix << endl;
-    // -- F -> E
-    Mat E_f_F;
-    essentialFromFundamental ( fundamental_matrix, K, K, E_f_F );
-    cout << "E from F:" << endl << E_f_F << endl;
-    Mat E_f_F_scaled = scaled_E ( E_f_F );
-    cout << "Scaled E:" << endl << E_f_F_scaled << endl;
-    
 
 #ifndef _CV_VERSION_3
     cout << "Seems we are not using OpenCV 3.x, so no findEssentialMat, just return." << endl;
@@ -591,22 +535,23 @@ void calculateRT_CV3 (
 
     //-- 计算本质矩阵
     Mat E = findEssentialMat ( points1, points2, K );
-    cout << "E from findEssentialMat:" << endl << E << endl;
-    Mat E_scaled = scaled_E ( E );
-    cout << "Scaled E:" << endl << E_scaled << endl;
+    
+    
+    if (withDebug)
+    {
+        cout << "E from findEssentialMat:" << endl << E << endl;
+        Mat E_scaled = scaled_E ( E );
+        cout << "Scaled E:" << endl << E_scaled << endl;
 
-    // we can get four potential answers here
-    Mat R1_5pt, R2_5pt, tvec_5pt, rvec1_5pt, rvec2_5pt;
-    decomposeEssentialMat ( E, R1_5pt, R2_5pt, tvec_5pt );
-    cout << "============== decomposeEssentialMat =============" << endl;
-    DEBUG_RT ( R1_5pt, tvec_5pt );
-    DEBUG_RT ( R2_5pt, tvec_5pt );
-    cout << "============== decomposeEssentialMat =============" << endl;
-
-    //-- 计算单应矩阵
-    //Mat homography_matrix = findHomography ( points1, points2, RANSAC, 3 );
-    //cout << "homography_matrix is " << endl << homography_matrix << endl;
-
+        // we can get four potential answers here
+        Mat R1_5pt, R2_5pt, tvec_5pt, rvec1_5pt, rvec2_5pt;
+        decomposeEssentialMat ( E, R1_5pt, R2_5pt, tvec_5pt );
+        cout << "============== decomposeEssentialMat =============" << endl;
+        DEBUG_RT ( R1_5pt, tvec_5pt );
+        DEBUG_RT ( R2_5pt, tvec_5pt );
+        cout << "============== decomposeEssentialMat =============" << endl;
+    }
+    
     //-- 从本质矩阵中恢复旋转和平移信息.
     recoverPose ( E, points1, points2, K, R, t );
 #endif
@@ -664,4 +609,20 @@ void print_pts ( vector<Point2f>& points1,
     }
     
     
+}
+
+Point2f pixel2cam ( const Point2f& p, const Mat& K )
+{
+    //[1、像素坐标与像平面坐标系之间的关系 ](http://blog.csdn.net/waeceo/article/details/50580607)
+    return Point2f
+    (
+        (p.x - K.at<double> ( 0, 2 )) / K.at<double> ( 0, 0 ),
+        (p.y - K.at<double> ( 1, 2 )) / K.at<double> ( 1, 1 )
+    );
+}
+
+void pixel2cam ( const double px, const double py, const Mat& K, double& cx, double& cy )
+{
+    cx = (px - K.at<double> ( 0, 2 )) / K.at<double> ( 0, 0 );
+    cy = (py - K.at<double> ( 1, 2 )) / K.at<double> ( 1, 1 );
 }

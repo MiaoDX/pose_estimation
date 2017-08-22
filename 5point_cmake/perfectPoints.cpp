@@ -33,10 +33,9 @@ int main()
     double focal = 300;
     Point2d pp(0, 0);
     Mat K = (Mat_<double> ( 3, 3 ) << focal, 0, pp.x, 0, focal, pp.y, 0, 0, 1);
-    double K_arr[9] = { focal, 0, pp.x, 0, focal, pp.y, 0, 0, 1 };
 
     //Mat K = (Mat_<double> ( 3, 3 ) << 8607.8639, 0, 2880.72115, 0, 8605.4303, 1913.87935, 0, 0, 1);
-    //double K_arr[9] = { 8607.8639, 0, 2880.72115, 0, 8605.4303, 1913.87935, 0, 0, 1 };
+
     
 
     Mat rvec = (cv::Mat_<double>(3, 1) << 0.1 , 0.2 , 0.3);
@@ -93,39 +92,29 @@ int main()
     }
 
 
-    // Mat F = cv::findFundamentalMat(x1s, x2s, noArray(), CV_RANSAC);
-    Mat F = cv::findFundamentalMat ( pts1, pts2, noArray (), CV_RANSAC );
-    cout << "F:" << endl << F << endl;
-
-    
-
-    Mat E_f_F = K.t() * F * K;
-    cout << "E from F:" << endl << E_f_F << endl;    
-    cout << "Scaled E from F:" << endl << scaled_E(E_f_F) << endl;
-
-/*
- * Code below is almost the same as calculateRT_CV3 in getRTAlgo.cpp
- */
 #ifdef _CV_VERSION_3
-    // Mat E = findEssentialMat(x1s, x2s, K, CV_RANSAC, 0.99, 1, noArray());
-    Mat E = findEssentialMat ( pts1, pts2, K, CV_RANSAC, 0.99, 1, noArray () );
-
     std::cout << "=====================================================" << std::endl;
-    cout << "E from findEssentialMat:" << endl << E << endl;
-    cout << "Scaled E:" << endl << scaled_E ( E ) << endl;
-    
-       
-    // we can get four potential answers here
-    Mat R1_5pt, R2_5pt, tvec_5pt, rvec1_5pt, rvec2_5pt; 
-    decomposeEssentialMat(E, R1_5pt, R2_5pt, tvec_5pt); 
-    cout << "============== decomposeEssentialMat =============" << endl;
-    DEBUG_RT ( R1_5pt, tvec_5pt );
-    DEBUG_RT ( R2_5pt, tvec_5pt );
-    cout << "============== decomposeEssentialMat =============" << endl;
-
-    Mat R, t, r;
-    recoverPose(E, x1s, x2s, K, R, t);
+    std::cout << "calculateRT_CV3:" << std::endl;
+    Mat R, t;
+    calculateRT_CV3 ( pts1, pts2, K, R, t );
     DEBUG_RT ( R, t );
+
+
+    cout << "Do some timing test" << endl;
+    double start = cv::getTickCount ();
+    int test_num = 50;
+    for ( int i = 0; i < test_num; i++ )
+    {
+        calculateRT_CV3 ( pts1, pts2, K, R, t, false );
+        //DEBUG_RT ( R, t );
+    }
+    double end = cv::getTickCount ();
+    double elapse = (end - start) / cv::getTickFrequency ();
+    double avg_time_us = (elapse / test_num) * 1000000;
+    cout << "Average execution time: " << avg_time_us << " us" << endl;
+    cout << endl;
+
+
 #else
     cout << "Seems we are not using OpenCV 3.x, so no findEssentialMat." << endl;
 #endif
@@ -135,8 +124,22 @@ int main()
     std::cout << "Now, use Nghia Ho.'s algorithm" << std::endl;
 
     Mat R_5, t_5;
-    calculateRT_5points ( pts1, pts2, K_arr, R_5, t_5, pts1.size () );
+    calculateRT_5points ( pts1, pts2, K, R_5, t_5, pts1.size () );
     DEBUG_RT ( R_5, t_5 );
+
+
+    cout << "Do some timing test" << endl;
+    start = cv::getTickCount ();
+    for ( int i = 0; i < test_num; i++ )
+    {
+        calculateRT_5points ( pts1, pts2, K, R_5, t_5, pts1.size (), false );
+        //DEBUG_RT ( R_5, t_5 );
+    }
+    end = cv::getTickCount ();
+    elapse = (end - start) / cv::getTickFrequency ();
+    avg_time_us = (elapse / test_num) * 1000000;
+    cout << "Average execution time: " << avg_time_us << " us" << endl;
+    cout << endl;
 
     system("pause");
 }

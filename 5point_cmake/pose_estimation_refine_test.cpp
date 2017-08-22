@@ -33,14 +33,14 @@ int main ( int argc, char** argv )
     //DebugMatchedKeyPoints ( img_1, img_2, keypoints_1_all, keypoints_2_all, matches );
 
 
-    calcuateRT_test ( keypoints_1_all, keypoints_2_all, matches, K, K_arr );
+    calcuateRT_test ( keypoints_1_all, keypoints_2_all, matches, K );
     
     
     refineMatcheswithHomography ( keypoints_1_all, keypoints_2_all, matches );
-    calcuateRT_test ( keypoints_1_all, keypoints_2_all, matches, K, K_arr );
+    calcuateRT_test ( keypoints_1_all, keypoints_2_all, matches, K);
 
     refineMatchesWithFundmentalMatrix ( keypoints_1_all, keypoints_2_all, matches );
-    calcuateRT_test ( keypoints_1_all, keypoints_2_all, matches, K, K_arr );
+    calcuateRT_test ( keypoints_1_all, keypoints_2_all, matches, K);
 
     system ( "pause" );
 

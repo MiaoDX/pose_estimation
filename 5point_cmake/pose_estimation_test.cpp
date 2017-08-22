@@ -23,7 +23,6 @@ int main(int argc,char **argv){
 
 
   Mat K = (Mat_<double> ( 3, 3 ) << 8607.8639, 0, 2880.72115, 0, 8605.4303, 1913.87935, 0, 0, 1);
-  double K_arr[9] = { 8607.8639, 0, 2880.72115, 0, 8605.4303, 1913.87935, 0, 0, 1 };
 
 
   //string featureName = "BRISK";
@@ -58,7 +57,7 @@ int main(int argc,char **argv){
   DEBUG_RT ( R, t );
 
   Mat R_5, t_5;
-  calculateRT_5points ( pts1, pts2, K_arr, R_5, t_5, pts1.size () );
+  calculateRT_5points ( pts1, pts2, K, R_5, t_5, pts1.size () );
   DEBUG_RT ( R_5, t_5 );
 
   system ( "pause" );

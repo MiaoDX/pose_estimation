@@ -25,7 +25,7 @@ int main ( int argc, char** argv )
     //Mat K = (Mat_<double> ( 3, 3 ) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1);
 	//K = np.array ( [[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935], [0, 0, 1]] ) # Canon5DMarkIII - EF50mm
 	Mat K = (Mat_<double> ( 3, 3 ) << 8607.8639, 0, 2880.72115, 0, 8605.4303, 1913.87935, 0, 0, 1);
-    double K_arr[9] = { 8607.8639, 0, 2880.72115, 0, 8605.4303, 1913.87935, 0, 0, 1 };
+
 
     vector<KeyPoint> keypoints_1_all, keypoints_2_all;
     vector<DMatch> matches;
@@ -36,7 +36,7 @@ int main ( int argc, char** argv )
     //DebugMatchedKeyPoints ( img_1, img_2, keypoints_1_all, keypoints_2_all, matches );
 
 
-    calcuateRT_test ( keypoints_1_all, keypoints_2_all, matches, K, K_arr );
+    calcuateRT_test ( keypoints_1_all, keypoints_2_all, matches, K);
 
 
 

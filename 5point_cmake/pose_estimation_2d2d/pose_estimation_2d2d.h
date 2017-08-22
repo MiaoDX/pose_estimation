@@ -17,7 +17,7 @@ using namespace std;
 using namespace cv;
 
 
-void calcuateRT_test ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K, double* K_arr );
+void calcuateRT_test ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K);
 
 void find_feature_matches (
     const Mat& img_1, const Mat& img_2,
@@ -46,5 +46,3 @@ void essentialFromFundamental ( const Mat &F,
     Mat& E );
 
 
-// 像素坐标转相机归一化坐标
-Point2f pixel2cam ( const Point2f& p, const Mat& K );
