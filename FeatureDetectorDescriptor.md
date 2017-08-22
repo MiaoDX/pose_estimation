@@ -1,6 +1,21 @@
-It is not so hard to use the APIs of feature detector and descriptors, but not so trivial to find the right/possible usage of them. If the descriptors are binary, it is better to use HAMMING distance when do matching, and the nice combination of different detectors and descriptors is still unknown to me.
+Notes on Feature Detector and Descriptor.
 
-### [OpenCV 3: List of available FeatureDetector::create() and DescriptorExtractor::create() options?](https://stackoverflow.com/questions/36691050/opencv-3-list-of-available-featuredetectorcreate-and-descriptorextractorc)
+It is not so hard to use the APIs of feature detector and descriptors, but not so trivial to find the right/possible usage of them. And a nice workflow may be appreciate.
+
+# The pose estimation workflow
+
+* Detect the feature points and descriptors
+    - SIFT, SURF / ORB, BRIEF, BRISK and others
+* Match with the distance of descriptors
+    - NORM_L2, NORM_HAMMING
+* Refine the matches
+    - correctMatches, with Homography, Fundmental
+* Calculate the R,t
+    - decomposeEssentialMat/recoverPose, decomposeHomographyMat
+
+## Types of available feature detectors and descriptors
+
+[OpenCV 3: List of available FeatureDetector::create() and DescriptorExtractor::create() options?](https://stackoverflow.com/questions/36691050/opencv-3-list-of-available-featuredetectorcreate-and-descriptorextractorc)
 
 Other solution is to test each feature:
 
@@ -30,8 +45,11 @@ SIFT: detector + descriptor
 SURF: detector + descriptor
 ```
 
+
+The default type of descriptors and distance calculate method (norm):
+
 ``` cpp
-// To know which norm type to use: OpenCV 3.x
+// To know which norm type to use: OpenCV 3.x, OpenCV 2.x do not have the `NormTypes` enum.
 Ptr<Feature2D> akaze = AKAZE::create (); 
 std::cout << "AKAZE: " << akaze->descriptorType() << " ; CV_8U=" << CV_8U << std::endl;
 std::cout << "AKAZE: " << akaze->defaultNorm() << " ; NORM_HAMMING=" << cv::NORM_HAMMING << std::endl;
@@ -53,7 +71,15 @@ It is okay to accept if things are so.
 
 * [CasHash-CUDA, image matching with cascade hashing](https://github.com/cvcore/CasHash_CUDA)
 
+* [CudaSift](https://github.com/Celebrandil/CudaSift)
 
-## [OpenCV2:特征匹配及其优化](http://www.cnblogs.com/wangguchangqing/p/4333873.html)
 
-It have some refine with F and H.
+## Refine/correct the matched points
+
+I do believe the performance of pose estimation really relays on how good the matches are, so the refine part is more than crucial.
+
+* [OpenCV2:特征匹配及其优化](http://www.cnblogs.com/wangguchangqing/p/4333873.html)
+    - Use H and F  
+
+* [undistortPoints, findEssentialMat, recoverPose: What is the relation between their arguments?](http://answers.opencv.org/question/65788/undistortpoints-findessentialmat-recoverpose-what-is-the-relation-between-their-arguments/)
+    - Use `correctMatches`

@@ -251,19 +251,24 @@ void refineMatcheswithHomography ( const vector<KeyPoint> kps1,const vector<KeyP
 
     kp2pts ( kps1, kps2, matches, pts1, pts2 );
 
-    //find homography matrix and get inliers mask
-    vector<uchar> inliersMask ( matches.size () );
-    findHomography ( pts1, pts2, CV_RANSAC, reprojectionThreshold, inliersMask );
 
+    //find homography matrix and get inliers mask
+    //vector<uchar> inliersMask ( matches.size () );
+    Mat inliersMask;
+    findHomography ( pts1, pts2, CV_RANSAC, reprojectionThreshold, inliersMask );
+    cout << "inliersMask, channels:" << inliersMask.channels () << ", type:" << inliersMask.type () << ", size:" << inliersMask.size () << endl;
     vector<DMatch> inliers;
-    for ( size_t i = 0; i < inliersMask.size (); i++ ) {
-        if ( inliersMask[i] )
+    for ( int i = 0; i < inliersMask.rows; i++ ) {
+        if ( inliersMask.at<uchar> ( i, 0 ) )
+        {
             inliers.push_back ( matches[i] );
+        }
     }
+
+
 
     cout << "In refineMatcheswithHomography, matches: " << matches.size () << " -> " << inliers.size () << endl;
 
-    // matches.swap ( inliers );
     matches = inliers;
 }
 
@@ -274,18 +279,20 @@ void refineMatchesWithFundmentalMatrix ( const vector<KeyPoint> kps1, const vect
 
     kp2pts ( kps1, kps2, matches, pts1, pts2 );
 
-    vector<uchar> inliersMask ( matches.size () );
-
+    //vector<uchar> inliersMask ( matches.size () );
+    Mat inliersMask;
     findFundamentalMat ( pts1, pts2, inliersMask, FM_RANSAC );
-
+    cout << "inliersMask, channels:" << inliersMask.channels () << ", type:" << inliersMask.type () << ", size:" << inliersMask.size () << endl;
     vector<DMatch> inliers;
-    for ( size_t i = 0; i < inliersMask.size (); i++ ) {
-        if ( inliersMask[i] )
+    for ( int i = 0; i < inliersMask.rows; i++ ) {
+        if ( inliersMask.at<uchar> ( i, 0 ) )
+        {
             inliers.push_back ( matches[i] );
+        }
     }
 
+
     cout << "In refineMatchesWithFundmentalMatrix, matches: " << matches.size () << " -> " << inliers.size () << endl;
-    // matches.swap ( inliers );
     matches = inliers;
 }
 
@@ -364,7 +371,7 @@ bool calculateRT_5points ( const vector<Point2f>& vpts1, const vector<Point2f>& 
 
     if (withDebug)
     {
-        cout << "In calculateRT_5points, num of points: " << npts << ",chosenNum:" << chosenNum << endl;
+        cout << "In calculateRT_5points, num of points: " << npts << ", chosenNum:" << chosenNum << endl;
     }
     
 
@@ -391,7 +398,7 @@ bool calculateRT_5points ( const vector<Point2f>& vpts1, const vector<Point2f>& 
     if (withDebug)
     {
         cout << "============== Solve5PointEssential =============" << endl;
-        printf ( "Solve5PointEssential() found %d solutions:\n", E.size () );
+        printf ( "Solve5PointEssential() found %llu solutions:\n", E.size () );
     }
     
     size_t best_index = -1;
@@ -403,7 +410,7 @@ bool calculateRT_5points ( const vector<Point2f>& vpts1, const vector<Point2f>& 
             {
                 R = P[i].colRange ( 0, 3 );
                 t = P[i].colRange ( 3, 4 );
-                printf ( "%d/%d : %d/%d\t", i, E.size(), inliers[i], npts );
+                printf ( "%zd/%zd : %d/%d\t", i, E.size(), inliers[i], npts );
                 DEBUG_RT ( R, t );
             }
             
@@ -552,8 +559,35 @@ void calculateRT_CV3 (
         cout << "============== decomposeEssentialMat =============" << endl;
     }
     
-    //-- 从本质矩阵中恢复旋转和平移信息.
-    recoverPose ( E, points1, points2, K, R, t );
+
+    //vector<uchar> inliersMask ( points1.size () ); // we can not set as this, since it seems that the Mask is changed shape in the method
+    Mat inliersMask;
+
+    //-- 从本质矩阵中恢复旋转和平移信息.re
+    recoverPose ( E, points1, points2, K, R, t, inliersMask );
+    
+    cout << "inliersMask, channels:" << inliersMask.channels () << ", type:" << inliersMask.type () << ", size:" << inliersMask.size() << endl;
+
+    
+    vector<Point2f> inliers_pts1, inliers_pts2;
+    
+    for ( int i = 0; i < inliersMask.rows; i++ ) {
+        if ( inliersMask.at<uchar>(i, 0) )
+        {
+            inliers_pts1.push_back ( points1[i] );
+            inliers_pts2.push_back ( points2[i] );
+        }
+    }
+    
+   
+
+    if (withDebug)
+    {
+        cout << "In recoverPose, points:" << points1.size () << "->" << inliers_pts1.size () << endl;
+    }
+
+
+    
 #endif
 }
 
@@ -598,7 +632,7 @@ void print_pts ( vector<Point2f>& points1,
     
     //cout << "All points:" << points1.size () << ", points << {" << start << "}-{" << end << "}" << endl;
     
-    printf ( "All points:{%d}, Key points {%d}-{%d}:\n", points1.size (), start, end );
+    printf ( "All points:{%llu}, Key points {%d}-{%d}:\n", points1.size (), start, end );
 
     for ( int i = start; i < end; i++ ) {
         Point2d p1 = points1[i];

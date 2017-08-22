@@ -1,4 +1,6 @@
-### [Mat, vector<point2f>，Iplimage等等常见类型转换](http://blog.csdn.net/foreverhehe716/article/details/6749175)
+Some notes of OpenCV
+
+## [Mat, vector<point2f>，Iplimage等等常见类型转换](http://blog.csdn.net/foreverhehe716/article/details/6749175)
 
 Seems not so right.
 
@@ -6,7 +8,7 @@ Seems not so right.
 vector<Point2f> ptsa = Mat_<Point2f>(x1s);
 ```
 
-### Parameters makes different
+## Parameters makes different
 
 * [param1 of findFundamentalMat](http://docs.opencv.org/3.2.0/d9/d0c/group__calib3d.html)
 
@@ -30,4 +32,15 @@ The `nfeatures`, the default 500 can be too small for many cases.
 ``` python
 # OpenCV 3.x
 orb = cv2.ORB_create(nfeatures=5000)
+```
+
+
+## Format printf
+
+``` vi
+size_t x = ...;
+ssize_t y = ...;
+printf("%zu\n", x);  // prints as unsigned decimal
+printf("%zx\n", x);  // prints as hex
+printf("%zd\n", y);  // prints as signed decimal
 ```

@@ -26,8 +26,8 @@ int main(int argc,char **argv){
 
 
   //string featureName = "BRISK";
-  string featureName = "BRIEF";
-  //string featureName = "ORB";
+  //string featureName = "BRIEF";
+  string featureName = "ORB";
 
 
   string imgname1 = argv[1];
@@ -43,7 +43,7 @@ int main(int argc,char **argv){
   // extractKeyPointsAndMatches (featureName, imgname1, imgname2, kpts1, kpts2, matches, true);
 
   // - REFINE
-  // refineMatcheswithHomography ( kpts1, kpts2, matches );
+  refineMatcheswithHomography ( kpts1, kpts2, matches );
   // refineMatchesWithFundmentalMatrix ( kpts1, kpts2, matches );
     
   vector<Point2f> pts1, pts2;
