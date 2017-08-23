@@ -23,18 +23,31 @@ def main():
     # can be recovered with calibrate.py
     # but the examples used here are already undistorted, taken with a camera
     # of known K
-    K = np.array([[2759.48/4, 0, 1520.69/4, 0, 2764.16/4,
-                   1006.81/4, 0, 0, 1]]).reshape(3, 3)
+
+    # K = np.array([[2759.48/4, 0, 1520.69/4, 0, 2764.16/4,
+    #                1006.81/4, 0, 0, 1]]).reshape(3, 3)
+
+    K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935], [0, 0, 1]])  # Canon5DMarkIII-EF50mm
+
     d = np.array([0.0, 0.0, 0.0, 0.0, 0.0]).reshape(1, 5)
     scene = SceneReconstruction3D(K, d)
 
     # load a pair of images for which to perform SfM
-    scene.load_image_pair("fountain_dense/0004.png", "fountain_dense/0005.png")
+    #scene.load_image_pair("fountain_dense/0004.png", "fountain_dense/0005.png")
+    scene.load_image_pair("H:/projects/SLAM/python_code/dataset/our/trajs2/1.jpg", "H:/projects/SLAM/python_code/dataset/our/trajs2/4.jpg")
+
+
+    # when these is activated, the plot_point_cloud fail somewhat
+
+    scene.plot_optic_flow()
+    #scene.draw_epipolar_lines()
+    #scene.plot_rectified_images(feat_mode="orb")
 
     # draw 3D point cloud of fountain
     # use "pan axes" button in pyplot to inspect the cloud (rotate and zoom
     # to convince you of the result)
-    scene.plot_point_cloud()
+    # scene.plot_point_cloud(feat_mode="orb")
+    #scene.plot_point_cloud()
 
 
 if __name__ == '__main__':
