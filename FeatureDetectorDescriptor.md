@@ -73,6 +73,7 @@ It is okay to accept if things are so.
 
 * [CudaSift](https://github.com/Celebrandil/CudaSift)
 
+### [Matching SM architectures (CUDA arch and CUDA gencode) for various NVIDIA cards](http://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/)
 
 ## Refine/correct the matched points
 

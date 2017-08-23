@@ -43,4 +43,7 @@ ssize_t y = ...;
 printf("%zu\n", x);  // prints as unsigned decimal
 printf("%zx\n", x);  // prints as hex
 printf("%zd\n", y);  // prints as signed decimal
+
+
+%llu // for unsigned __int64
 ```
