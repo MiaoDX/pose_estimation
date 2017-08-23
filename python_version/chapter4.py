@@ -15,7 +15,7 @@
 
 import numpy as np
 
-from scene3D import SceneReconstruction3D
+from scene3D import CameraRelocation
 
 
 def main():
@@ -30,16 +30,16 @@ def main():
     K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935], [0, 0, 1]])  # Canon5DMarkIII-EF50mm
 
     d = np.array([0.0, 0.0, 0.0, 0.0, 0.0]).reshape(1, 5)
-    scene = SceneReconstruction3D(K, d)
+    #scene = SceneReconstruction3D(K, d)
 
     # load a pair of images for which to perform SfM
     #scene.load_image_pair("fountain_dense/0004.png", "fountain_dense/0005.png")
-    scene.load_image_pair("H:/projects/SLAM/python_code/dataset/our/trajs2/1.jpg", "H:/projects/SLAM/python_code/dataset/our/trajs2/4.jpg")
+    #scene.load_image_pair("H:/projects/SLAM/python_code/dataset/our/trajs2/1.jpg", "H:/projects/SLAM/python_code/dataset/our/trajs2/4.jpg")
 
 
     # when these is activated, the plot_point_cloud fail somewhat
 
-    scene.plot_optic_flow()
+    #scene.plot_optic_flow()
     #scene.draw_epipolar_lines()
     #scene.plot_rectified_images(feat_mode="orb")
 
@@ -50,5 +50,35 @@ def main():
     #scene.plot_point_cloud()
 
 
+def test_camera_relocation():
+
+
+    K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935], [0, 0, 1]])  # Canon5DMarkIII-EF50mm
+    d = np.array([0.0, 0.0, 0.0, 0.0, 0.0]).reshape(1, 5)
+
+    base_dir = "H:/projects/SLAM/python_code/dataset/our/trajs2/"
+
+    im1_file = base_dir + '1.jpg'
+    im2_file = base_dir + '2.jpg'
+    im3_file = base_dir + '3.jpg'
+    im4_file = base_dir + '4.jpg'
+
+    im_files = [im1_file, im2_file, im3_file, im4_file]
+
+    cameraRelocation = CameraRelocation(K, d, feature_name="BRIEF")
+
+    #cameraRelocation.set_feature_detector_descriptor_extractor("ORB", None, dict(nfeatures=1000))
+    #cameraRelocation.set_matcher(True) # this should use along with the set fd and de
+
+
+    #cameraRelocation.forward(im1_file)
+    #cameraRelocation.forward(im2_file)
+
+    for im_file in im_files[:2]:
+        cameraRelocation.forward(im_file)
+
+
+
 if __name__ == '__main__':
-    main()
+    #main()
+    test_camera_relocation()
