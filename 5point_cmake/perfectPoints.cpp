@@ -54,6 +54,12 @@ int main()
     Mat Xs(N, 3, CV_64F);
     rng.fill(Xs, RNG::UNIFORM, -bound_2d, bound_2d);
 
+    Mat noises ( N, 3, CV_64F );
+    rng.fill ( noises, RNG::UNIFORM, -bound_2d/100, bound_2d/100 );
+
+    Xs += noises;
+
+
     cout << "Print out the first five lines of random values:" << endl;
     for(int i = 0; i < 5; i++ )
     {
