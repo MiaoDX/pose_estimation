@@ -73,6 +73,12 @@ It is okay to accept if things are so.
 
 * [CudaSift](https://github.com/Celebrandil/CudaSift)
 
+* [pyboostcvconverter](https://github.com/Algomorph/pyboostcvconverter)
+
+* [numpy-opencv-converter](https://github.com/spillai/numpy-opencv-converter)
+
+* [Using Opencv Cuda functions from python](https://stackoverflow.com/questions/43828944/using-opencv-cuda-functions-from-python)
+
 ### [Matching SM architectures (CUDA arch and CUDA gencode) for various NVIDIA cards](http://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/)
 
 ## Refine/correct the matched points
