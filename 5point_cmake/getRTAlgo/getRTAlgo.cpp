@@ -566,7 +566,7 @@ void calculateRT_CV3 (
     //-- 从本质矩阵中恢复旋转和平移信息.re
     recoverPose ( E, points1, points2, K, R, t, inliersMask );
     
-    cout << "inliersMask, channels:" << inliersMask.channels () << ", type:" << inliersMask.type () << ", size:" << inliersMask.size() << endl;
+    // cout << "inliersMask, channels:" << inliersMask.channels () << ", type:" << inliersMask.type () << ", size:" << inliersMask.size() << endl;
 
     
     vector<Point2f> inliers_pts1, inliers_pts2;
