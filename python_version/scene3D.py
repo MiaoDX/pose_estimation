@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 
 import imutils
 import pose_estimation_utils as pe_utils
-import image_color_utils as im_cutils
 import keypoints_descriptors_utils as kd_utils
 
 
@@ -127,7 +126,7 @@ class CameraRelocation:
         return img_color, img
 
 
-    def set_feature_detector_descriptor_extractor(self, featurename="ORB", descriptor_extractor_name=None, feature_detector_params=dict(), descriptor_extractor_params=dict()):
+    def set_feature_detector_descriptor_extractor(self, featurename="ORB", descriptor_extractor_name=None, feature_detector_params=None, descriptor_extractor_params=None):
         self.feature_detector, self.descriptor_extractor, self.normType = kd_utils.get_feature_detector_descriptor_extractor(featurename, descriptor_extractor_name, feature_detector_params, descriptor_extractor_params)
 
     def set_matcher(self, withFlann=False):

@@ -8,7 +8,7 @@ The helper function of keypoints and descriptors
 import cv2
 import imutils
 
-def get_feature_detector_descriptor_extractor(feature_detector_name=str(), descriptor_extractor_name=None, feature_detector_params=dict(), descriptor_extractor_params=dict()):
+def get_feature_detector_descriptor_extractor(feature_detector_name=str(), descriptor_extractor_name=None, feature_detector_params=None, descriptor_extractor_params=None):
     """
     :param feature_detector_name:
     :param descriptor_extractor_name:
@@ -17,6 +17,10 @@ def get_feature_detector_descriptor_extractor(feature_detector_name=str(), descr
     :return:
     """
     assert len(feature_detector_name) != 0
+    if feature_detector_params == None:
+        feature_detector_params = dict()
+    if descriptor_extractor_params == None:
+        descriptor_extractor_params = dict()
 
     feature_detector_name = feature_detector_name.upper()
 
@@ -33,7 +37,7 @@ def get_feature_detector_descriptor_extractor(feature_detector_name=str(), descr
         else:
             feature_detector = descriptor_extractor = cv2.ORB_create(**feature_detector_params)
 
-    if feature_detector_name == "BRIEF":
+    elif feature_detector_name == "BRIEF":
         assert descriptor_extractor_name is None and len(descriptor_extractor_params) == 0
         if imutils.is_cv2():
             feature_detector = cv2.StarDetector(**feature_detector_params)
@@ -43,8 +47,7 @@ def get_feature_detector_descriptor_extractor(feature_detector_name=str(), descr
             feature_detector = cv2.xfeatures2d.StarDetector_create(**feature_detector_params)
             descriptor_extractor = cv2.xfeatures2d.BriefDescriptorExtractor_create(**descriptor_extractor_params)
 
-
-    if feature_detector_name == "BRISK":
+    elif feature_detector_name == "BRISK":
         assert descriptor_extractor_name is None and len(descriptor_extractor_params) == 0
         if imutils.is_cv2():
             feature_detector = descriptor_extractor = cv2.BRISK(**feature_detector_params)

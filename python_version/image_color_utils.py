@@ -54,6 +54,7 @@ def imshow_cv_plt(im, name="", use_plt=False):
     im = im2BGR_dim3(im)
 
     if not use_plt:
+        cv2.namedWindow(name, cv2.WINDOW_GUI_NORMAL|cv2.WINDOW_KEEPRATIO) # not sure which is better
         cv2.imshow(name, im)
         cv2.waitKey(0)
         return

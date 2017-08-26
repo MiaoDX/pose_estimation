@@ -29,6 +29,14 @@ def R2yzx(R):
 
     return np.array([z, y, x]).reshape(3,1) # to make it the same as t
 
+def Rs2zyxs(Rs):
+    zyxs = []
+    for R in Rs:
+        zyxs.append(R2yzx(R))
+    zyxs =  np.array(zyxs)
+    assert zyxs[0].shape == (3,1)
+
+    return zyxs
 
 def DEBUG_Rt(R, t, name=""):
     print(name)
