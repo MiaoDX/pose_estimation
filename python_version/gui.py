@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """A module containing simple GUI layouts using wxPython"""
 
 import abc
@@ -69,8 +68,8 @@ class BaseLayout(Meta1):
 
         self.imgHeight, self.imgWidth = frame.shape[:2]
         self.bmp = wx.BitmapFromBuffer(self.imgWidth, self.imgHeight, frame)
-        wx.Frame.__init__(self, parent, id, title,
-                          size=(self.imgWidth, self.imgHeight))
+        wx.Frame.__init__(
+            self, parent, id, title, size=(self.imgWidth, self.imgHeight))
 
         self._init_base_layout()
         self._create_base_layout()
@@ -110,8 +109,7 @@ class BaseLayout(Meta1):
 
         # display the button layout beneath the video stream
         self.panels_vertical = wx.BoxSizer(wx.VERTICAL)
-        self.panels_vertical.Add(self.pnl, 1, flag=wx.EXPAND | wx.TOP,
-                                 border=1)
+        self.panels_vertical.Add(self.pnl, 1, flag=wx.EXPAND | wx.TOP, border=1)
 
         # allow for custom layout modifications
         self._create_custom_layout()

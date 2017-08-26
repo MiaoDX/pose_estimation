@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """A module for camera calibration using a chessboard"""
 
 import cv2
@@ -24,10 +23,10 @@ class CameraCalibration(BaseLayout):
         self.chessboard_size = (9, 6)
 
         # prepare object points
-        self.objp = np.zeros((np.prod(self.chessboard_size), 3),
-                             dtype=np.float32)
-        self.objp[:, :2] = np.mgrid[0:self.chessboard_size[0],
-                                    0:self.chessboard_size[1]].T.reshape(-1, 2)
+        self.objp = np.zeros(
+            (np.prod(self.chessboard_size), 3), dtype=np.float32)
+        self.objp[:, :2] = np.mgrid[0:self.chessboard_size[0], 0:
+                                    self.chessboard_size[1]].T.reshape(-1, 2)
 
         # prepare recording
         self.recording = False
@@ -43,8 +42,8 @@ class CameraCalibration(BaseLayout):
         hbox.Add(self.button_calibrate)
         pnl.SetSizer(hbox)
 
-        self.panels_vertical.Add(pnl, flag=wx.EXPAND | wx.BOTTOM | wx.TOP,
-                                 border=1)
+        self.panels_vertical.Add(
+            pnl, flag=wx.EXPAND | wx.BOTTOM | wx.TOP, border=1)
 
     def _process_frame(self, frame):
         """Processes each frame
@@ -72,8 +71,7 @@ class CameraCalibration(BaseLayout):
             # need at least some number of chessboard samples before we can
             # calculate the intrinsic matrix
             ret, corners = cv2.findChessboardCorners(img_gray,
-                                                     self.chessboard_size,
-                                                     None)
+                                                     self.chessboard_size, None)
 
             if ret:
                 cv2.drawChessboardCorners(frame, self.chessboard_size, corners,
@@ -92,26 +90,28 @@ class CameraCalibration(BaseLayout):
             # we have already collected enough frames, so now we want to
             # calculate the intrinsic camera matrix (K) and the distortion
             # vector (dist)
-            print "Calibrating..."
-            ret, K, dist, rvecs, tvecs = cv2.calibrateCamera(self.obj_points,
-                                                             self.img_points,
-                                                             (self.imgHeight,
-                                                              self.imgWidth),
-                                                             None, None)
-            print "K=", K
-            print "dist=", dist
+            print
+            "Calibrating..."
+            ret, K, dist, rvecs, tvecs = cv2.calibrateCamera(
+                self.obj_points, self.img_points, (self.imgHeight,
+                                                   self.imgWidth), None, None)
+            print
+            "K=", K
+            print
+            "dist=", dist
 
             # double-check reconstruction error (should be as close to zero as
             # possible)
             mean_error = 0
             for i in xrange(len(self.obj_points)):
-                img_points2, _ = cv2.projectPoints(self.obj_points[i],
-                                                   rvecs[i], tvecs[i], K, dist)
+                img_points2, _ = cv2.projectPoints(self.obj_points[i], rvecs[i],
+                                                   tvecs[i], K, dist)
                 error = cv2.norm(self.img_points[i], img_points2,
                                  cv2.NORM_L2) / len(img_points2)
                 mean_error += error
 
-            print "mean error=", mean_error
+            print
+            "mean error=", mean_error
 
             self.recording = False
             self._reset_recording()
@@ -134,7 +134,7 @@ class CameraCalibration(BaseLayout):
 
 def main():
     capture = cv2.VideoCapture(0)
-    if not(capture.isOpened()):
+    if not (capture.isOpened()):
         capture.open()
 
     if hasattr(cv2, 'cv'):

@@ -1,21 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 The image color transfer
 """
-
 
 import cv2
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
-
-from enum import Enum  # in OpenCV 2.x, `pip install enum34` https://www.gitbook.com/book/taizilongxu/stackoverflow-about-python/details
+from enum import Enum    # in OpenCV 2.x, `pip install enum34` https://www.gitbook.com/book/taizilongxu/stackoverflow-about-python/details
 
 IM_COLOR = Enum('IM_COLOR', 'IM_GRAY IM_BGR IM_BGRA')
-
 
 
 def im_dim(im):
@@ -54,7 +50,8 @@ def imshow_cv_plt(im, name="", use_plt=False):
     im = im2BGR_dim3(im)
 
     if not use_plt:
-        cv2.namedWindow(name, cv2.WINDOW_GUI_NORMAL|cv2.WINDOW_KEEPRATIO) # not sure which is better
+        cv2.namedWindow(name, cv2.WINDOW_GUI_NORMAL |
+                        cv2.WINDOW_KEEPRATIO)    # not sure which is better
         cv2.imshow(name, im)
         cv2.waitKey(0)
         return

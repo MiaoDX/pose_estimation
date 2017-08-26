@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """OpenCV with Python Blueprints
     Chapter 4: 3D Scene Reconstruction Using Structure From Motion
 
@@ -27,7 +26,8 @@ def main():
     # K = np.array([[2759.48/4, 0, 1520.69/4, 0, 2764.16/4,
     #                1006.81/4, 0, 0, 1]]).reshape(3, 3)
 
-    K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935], [0, 0, 1]])  # Canon5DMarkIII-EF50mm
+    K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935],
+                  [0, 0, 1]])    # Canon5DMarkIII-EF50mm
 
     d = np.array([0.0, 0.0, 0.0, 0.0, 0.0]).reshape(1, 5)
     #scene = SceneReconstruction3D(K, d)
@@ -35,7 +35,6 @@ def main():
     # load a pair of images for which to perform SfM
     #scene.load_image_pair("fountain_dense/0004.png", "fountain_dense/0005.png")
     #scene.load_image_pair("H:/projects/SLAM/python_code/dataset/our/trajs2/1.jpg", "H:/projects/SLAM/python_code/dataset/our/trajs2/4.jpg")
-
 
     # when these is activated, the plot_point_cloud fail somewhat
 
@@ -52,8 +51,8 @@ def main():
 
 def test_camera_relocation():
 
-
-    K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935], [0, 0, 1]])  # Canon5DMarkIII-EF50mm
+    K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935],
+                  [0, 0, 1]])    # Canon5DMarkIII-EF50mm
     d = np.array([0.0, 0.0, 0.0, 0.0, 0.0]).reshape(1, 5)
 
     base_dir = "H:/projects/SLAM/python_code/dataset/our/trajs2/"
@@ -70,13 +69,11 @@ def test_camera_relocation():
     #cameraRelocation.set_feature_detector_descriptor_extractor("ORB", None, dict(nfeatures=1000))
     #cameraRelocation.set_matcher(True) # this should use along with the set fd and de
 
-
     #cameraRelocation.forward(im1_file)
     #cameraRelocation.forward(im2_file)
 
     for im_file in im_files[:2]:
         cameraRelocation.forward(im_file)
-
 
 
 if __name__ == '__main__':

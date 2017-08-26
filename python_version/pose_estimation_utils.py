@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 Some utils functions to ease our life
 """
@@ -9,6 +8,7 @@ import cv2
 import numpy as np
 
 from linear_algebra_helper import cheirality_check
+
 
 def R2yzx(R):
     """
@@ -23,20 +23,22 @@ def R2yzx(R):
     r33 = R[2][2]
 
     from math import pi, atan2, sqrt
-    z = atan2(r21, r11)/pi*180
-    y = atan2(-r31, sqrt(r32*r32 + r33*r33))/pi*180
-    x = atan2(r32, r33)/pi*180
+    z = atan2(r21, r11) / pi * 180
+    y = atan2(-r31, sqrt(r32 * r32 + r33 * r33)) / pi * 180
+    x = atan2(r32, r33) / pi * 180
 
-    return np.array([z, y, x]).reshape(3,1) # to make it the same as t
+    return np.array([z, y, x]).reshape(3, 1)    # to make it the same as t
+
 
 def Rs2zyxs(Rs):
     zyxs = []
     for R in Rs:
         zyxs.append(R2yzx(R))
-    zyxs =  np.array(zyxs)
-    assert zyxs[0].shape == (3,1)
+    zyxs = np.array(zyxs)
+    assert zyxs[0].shape == (3, 1)
 
     return zyxs
+
 
 def DEBUG_Rt(R, t, name=""):
     print(name)
@@ -49,7 +51,8 @@ def DEBUG_Rt(R, t, name=""):
     print("t:\n{}".format(t))
 
 
-def key_points_to_matched_pixel_points(first_key_points, second_key_points, matches):
+def key_points_to_matched_pixel_points(first_key_points, second_key_points,
+                                       matches):
 
     first_match_points = np.zeros((len(matches), 2), dtype=np.float32)
     second_match_points = np.zeros_like(first_match_points)
@@ -81,7 +84,8 @@ def find_F_and_matches(kps1, kps2, matches):
         else:
             matches_F_bad.append(matches[i])
 
-    print("In find_F_and_refineMatches, matches:{} -> {}".format(len(matches), len(matches_F)))
+    print("In find_F_and_refineMatches, matches:{} -> {}".format(
+        len(matches), len(matches_F)))
 
     return F, matches_F, matches_F_bad
 
@@ -96,7 +100,6 @@ def find_E_and_matches_cv2(kp1, kp2, matches, K):
 def find_E_and_matches_cv3(kp1, kp2, matches, K):
 
     pts1, pts2, _ = key_points_to_matched_pixel_points(kp1, kp2, matches)
-
     """ findEssentialMat(points1, points2, cameraMatrix[, method[, prob[, threshold[, mask]]]]) -> retval, mask """
     #E, mask_E = cv2.findEssentialMat(pts1, pts2, cameraMatrix=K, method=cv2.RANSAC, prob=0.999, threshold=0.2)
     E, mask_E = cv2.findEssentialMat(pts1, pts2, cameraMatrix=K)
@@ -113,7 +116,8 @@ def find_E_and_matches_cv3(kp1, kp2, matches, K):
         else:
             matches_E_bad.append(matches[i])
 
-    print("In find_E_cv3, matches:{} -> {}".format(len(matches), len(matches_E)))
+    print(
+        "In find_E_cv3, matches:{} -> {}".format(len(matches), len(matches_E)))
 
     return E, matches_E, matches_E_bad
 
@@ -122,9 +126,9 @@ def recoverPose_from_E_cv3(E, kps1, kps2, matches, K):
 
     pts1, pts2, _ = key_points_to_matched_pixel_points(kps1, kps2, matches)
 
-    _, R, t, mask_rp = cv2.recoverPose(E, pts1, pts2,
-                                       K)  # this can have the determiate results, so we choose it
-
+    _, R, t, mask_rp = cv2.recoverPose(
+        E, pts1, pts2,
+        K)    # this can have the determiate results, so we choose it
 
     # We select only inlier points
     # pts1_rp = pts1[mask_rp.ravel() != 0]
@@ -137,12 +141,10 @@ def recoverPose_from_E_cv3(E, kps1, kps2, matches, K):
         else:
             matches_rp_bad.append(matches[i])
 
-    print("In recoverPoseFromE_cv3, points:{} -> inliner:{}".format(len(matches), len(matches_rp)))
+    print("In recoverPoseFromE_cv3, points:{} -> inliner:{}".format(
+        len(matches), len(matches_rp)))
 
     return R, t, matches_rp, matches_rp_bad
-
-
-
 
 
 def points_pixel_to_camera(pts1, pts2, K_inv):
@@ -158,6 +160,7 @@ def points_pixel_to_camera(pts1, pts2, K_inv):
 
     return pts1_cam, pts2_cam
 
+
 def recoverPose_from_E_cv2(E, kps1, kps2, matches, K):
 
     # iterate over all point correspondences used in the estimation of the
@@ -168,10 +171,10 @@ def recoverPose_from_E_cv2(E, kps1, kps2, matches, K):
 
     pts1_cam, pts2_cam = points_pixel_to_camera(pts1, pts2, K_inv)
 
+    match_inliers1, match_inliers2, Rt1, Rt2 = cheirality_check(
+        E, pts1_cam, pts2_cam)
 
-    match_inliers1, match_inliers2, Rt1, Rt2 = cheirality_check(E, pts1_cam, pts2_cam)
-
-    R = Rt2[:,:-1]
+    R = Rt2[:, :-1]
     t = Rt2[:, -1]
 
     return R, t, matches, list()

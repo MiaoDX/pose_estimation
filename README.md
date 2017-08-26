@@ -19,7 +19,6 @@ So, I want to do extra experiments with different implements of 5-points and see
 
 ## [FeatureDetectorDescriptor](FeatureDetectorDescriptor.md)
 
-## [OpenCV_NOTES](OpenCV_NOTES.md)
 
 # Time of experiment
 

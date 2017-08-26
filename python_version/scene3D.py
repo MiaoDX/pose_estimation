@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """A module that contains an algorithm for 3D scene reconstruction """
 
 import cv2
@@ -48,6 +47,7 @@ class Image:
         self.key_points = key_points
         self.descriptors = descriptors
 
+
 class CameraRelocation:
     """CameraRelocation
 
@@ -73,7 +73,7 @@ class CameraRelocation:
             :param dist: vector of distortion coefficients
         """
         self.K = K
-        self.K_inv = np.linalg.inv(K)  # store inverse for fast access
+        self.K_inv = np.linalg.inv(K)    # store inverse for fast access
         self.d = dist
 
         self.img1 = Image()
@@ -82,7 +82,6 @@ class CameraRelocation:
         # Ready to go
         self.set_feature_detector_descriptor_extractor(feature_name)
         self.set_matcher(withFlann=False)
-
 
     def forward(self, new_frame_name):
 
@@ -100,7 +99,6 @@ class CameraRelocation:
         self._find_essential_matrix()
         self._find_camera_matrices_rt()
 
-
     def _load_image_left(self, img_path):
         img_color, img_gray = self._load_image(img_path)
         self.img1 = Image(img_path, img_color, img_gray)
@@ -109,7 +107,7 @@ class CameraRelocation:
         img_color, img_gray = self._load_image(img_path)
         self.img2 = Image(img_path, img_color, img_gray)
 
-    def _load_image(self, img_path, use_pyr_down=False, target_width = 600):
+    def _load_image(self, img_path, use_pyr_down=False, target_width=600):
         img_color = cv2.imread(img_path)
         img = cv2.cvtColor(img_color, cv2.COLOR_BGR2GRAY)
 
@@ -119,15 +117,21 @@ class CameraRelocation:
 
         # scale down image if necessary to something close to target_width wide (px)
         if use_pyr_down and img.shape[1] > target_width:
-            while img.shape[1] > 2*target_width:
+            while img.shape[1] > 2 * target_width:
                 img = cv2.pyrDown(img)
         # undistort the images
         img = cv2.undistort(img, self.K, self.d)
         return img_color, img
 
-
-    def set_feature_detector_descriptor_extractor(self, featurename="ORB", descriptor_extractor_name=None, feature_detector_params=None, descriptor_extractor_params=None):
-        self.feature_detector, self.descriptor_extractor, self.normType = kd_utils.get_feature_detector_descriptor_extractor(featurename, descriptor_extractor_name, feature_detector_params, descriptor_extractor_params)
+    def set_feature_detector_descriptor_extractor(
+            self,
+            featurename="ORB",
+            descriptor_extractor_name=None,
+            feature_detector_params=None,
+            descriptor_extractor_params=None):
+        self.feature_detector, self.descriptor_extractor, self.normType = kd_utils.get_feature_detector_descriptor_extractor(
+            featurename, descriptor_extractor_name, feature_detector_params,
+            descriptor_extractor_params)
 
     def set_matcher(self, withFlann=False):
         self.matcher = kd_utils.get_matcher(self.normType, withFlann)
@@ -135,25 +139,28 @@ class CameraRelocation:
     def _get_keypoints_and_descripotrs(self):
 
         if self.img1.key_points is None:
-            self.img1.key_points, self.img1.descriptors = kd_utils.get_keypoints_and_descripotrs(self.feature_detector,
-                                                                                             self.descriptor_extractor,
-                                                                                             self.img1.img_gray)
+            self.img1.key_points, self.img1.descriptors = kd_utils.get_keypoints_and_descripotrs(
+                self.feature_detector, self.descriptor_extractor,
+                self.img1.img_gray)
 
-        self.img2.key_points, self.img2.descriptors = kd_utils.get_keypoints_and_descripotrs(self.feature_detector,
-                                                                                             self.descriptor_extractor,
-                                                                                             self.img2.img_gray)
+        self.img2.key_points, self.img2.descriptors = kd_utils.get_keypoints_and_descripotrs(
+            self.feature_detector, self.descriptor_extractor,
+            self.img2.img_gray)
 
     def _get_matches(self):
-        self.matches = kd_utils.match_with_type(self.matcher, self.img1.descriptors, self.img2.descriptors, self.normType)
-
+        self.matches = kd_utils.match_with_type(
+            self.matcher, self.img1.descriptors, self.img2.descriptors,
+            self.normType)
 
     def _find_fundamental_matrix(self):
         """Estimates fundamental matrix """
-        self.F, self.matches_F, _ = pe_utils.find_F_and_matches(self.img1.key_points, self.img2.key_points, self.matches)
+        self.F, self.matches_F, _ = pe_utils.find_F_and_matches(
+            self.img1.key_points, self.img2.key_points, self.matches)
 
     def _refine_with_fundamental_matrix(self):
         """Estimates fundamental matrix """
-        self.F, self.matches_F, _ = pe_utils.find_F_and_matches(self.img1.key_points, self.img2.key_points, self.matches)
+        self.F, self.matches_F, _ = pe_utils.find_F_and_matches(
+            self.img1.key_points, self.img2.key_points, self.matches)
         self.matches = self.matches_F
 
     def _find_essential_matrix(self):
@@ -161,17 +168,16 @@ class CameraRelocation:
 
         if imutils.is_cv2():
             # note, in OpenCV 2.x we use F to calc E, however, to make the API alike, we do the calculation inside
-            self.E, self.matches_E, self.matches_E_bad = pe_utils.find_E_and_matches_cv2(self.img1.key_points, self.img2.key_points,
-                                                                                         self.matches,
-                                                                                         self.K)
+            self.E, self.matches_E, self.matches_E_bad = pe_utils.find_E_and_matches_cv2(
+                self.img1.key_points, self.img2.key_points, self.matches,
+                self.K)
             print("E from FundamentalMat:{}".format(self.E))
 
         elif imutils.is_cv3():
-            self.E, self.matches_E, self.matches_E_bad = pe_utils.find_E_and_matches_cv3(self.img1.key_points, self.img2.key_points,
-                                                                                         self.matches,
-                                                                                         self.K)
+            self.E, self.matches_E, self.matches_E_bad = pe_utils.find_E_and_matches_cv3(
+                self.img1.key_points, self.img2.key_points, self.matches,
+                self.K)
             print("E from findEssentialMat:{}".format(self.E))
-
 
     def _find_camera_matrices_rt(self):
 
@@ -179,20 +185,15 @@ class CameraRelocation:
 
             print("USE recoverPose in cv3:")
 
-            self.R, self.t, matches_rp_cv3, matches_rp_bad_cv3 = pe_utils.recoverPose_from_E_cv3(self.E, self.img1.key_points,
-                                                                                                 self.img2.key_points, self.matches_E,
-                                                                               self.K)
-
+            self.R, self.t, matches_rp_cv3, matches_rp_bad_cv3 = pe_utils.recoverPose_from_E_cv3(
+                self.E, self.img1.key_points, self.img2.key_points,
+                self.matches_E, self.K)
 
             pe_utils.DEBUG_Rt(self.R, self.t, "R t from recoverPose")
 
         elif imutils.is_cv2():
-            self.R, self.t, matches_rp, matches_rp_bad = pe_utils.recoverPose_from_E_cv2(self.E, self.img1.key_points,
-                                                                                                 self.img2.key_points, self.matches_E,
-                                                                               self.K)
+            self.R, self.t, matches_rp, matches_rp_bad = pe_utils.recoverPose_from_E_cv2(
+                self.E, self.img1.key_points, self.img2.key_points,
+                self.matches_E, self.K)
 
             pe_utils.DEBUG_Rt(self.R, self.t, "R t from linear algebra")
-
-
-
-
