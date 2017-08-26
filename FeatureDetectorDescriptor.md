@@ -67,19 +67,7 @@ There is another *prove* out there: [How Does OpenCV ORB Feature Detector Work?]
 
 It is okay to accept if things are so.
 
-## GPU accelerated implements
 
-* [CasHash-CUDA, image matching with cascade hashing](https://github.com/cvcore/CasHash_CUDA)
-
-* [CudaSift](https://github.com/Celebrandil/CudaSift)
-
-* [pyboostcvconverter](https://github.com/Algomorph/pyboostcvconverter)
-
-* [numpy-opencv-converter](https://github.com/spillai/numpy-opencv-converter)
-
-* [Using Opencv Cuda functions from python](https://stackoverflow.com/questions/43828944/using-opencv-cuda-functions-from-python)
-
-### [Matching SM architectures (CUDA arch and CUDA gencode) for various NVIDIA cards](http://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/)
 
 ## Refine/correct the matched points
 
@@ -117,3 +105,41 @@ The `nfeatures`, the default 500 can be too small for many cases.
 # OpenCV 3.x
 orb = cv2.ORB_create(nfeatures=5000)
 ```
+
+
+## Resources online
+
+### Other methods
+
+* [SIFT and ASIFT --- online demo : try if your images match!](http://www.cmap.polytechnique.fr/~yu/research/ASIFT/demo.html)
+    - [ASIFT: An Algorithm for Fully Affine Invariant Comparison](http://www.ipol.im/pub/art/2011/my-asift/)
+* [OPENCV ASIFT C++ IMPLEMENTATION](http://www.mattsheckells.com/opencv-asift-c-implementation/)
+
+#### OpenGL
+
+* [Win 10 + VS 2015 如何搭建 OpenGL 环境？](https://www.zhihu.com/question/40665433)
+
+* [从零开始搭建 OpenGL 编程环境（Win 10 + VS 2015 + FreeGLUT + GLEW）](http://lemonc.me/opengl-win10-vs2015-setting.html)
+
+* [opengl-tutorial](http://www.opengl-tutorial.org/)
+
+### GPU accelerated implements
+
+* [CasHash-CUDA, image matching with cascade hashing](https://github.com/cvcore/CasHash_CUDA)
+
+* [CudaSift](https://github.com/Celebrandil/CudaSift)
+
+### With python
+
+* [imageAlignment](https://github.com/kif/imageAlignment)
+
+* [pyboostcvconverter](https://github.com/Algomorph/pyboostcvconverter)
+
+* [numpy-opencv-converter](https://github.com/spillai/numpy-opencv-converter)
+
+* [Using Opencv Cuda functions from python](https://stackoverflow.com/questions/43828944/using-opencv-cuda-functions-from-python)
+
+
+
+### [Matching SM architectures (CUDA arch and CUDA gencode) for various NVIDIA cards](http://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/)
+

@@ -24,3 +24,8 @@ So, I want to do extra experiments with different implements of 5-points and see
 # Time of experiment
 
 20170818, the last comment of Nghia Ho is `APRIL 21, 2016 AT 8:11 PM`
+
+
+***
+
+Good Luck & Have Fun.
