@@ -60,7 +60,7 @@ def split_matches_and_remove_less_confidence(kps1,
                                              kps2,
                                              matches,
                                              K,
-                                             splitnum,
+                                             splitnum=100,
                                              conf_thresh=0.7):
     assert kps1 is not None and kps2 is not None and matches is not None and K is not None
 
@@ -190,34 +190,25 @@ def get_nice_and_constant_zyxs_ts_list(zyxs_ts, accept_mode_ration=0.6):
 import keypoints_descriptors_utils as kd_utils
 
 
-def test_remove_less_confidence(kps1, kps2, matches, K, split_num=50,
-                                thres=0.7):
+def test_remove_less_confidence(kps1,
+                                kps2,
+                                matches,
+                                K,
+                                split_num=100,
+                                thres=0.7,
+                                test_time=10):
     start_lsd = cv2.getTickCount()
     freq = cv2.getTickFrequency()
 
-    test_num = 10
-    for i in range(test_num):
+    for i in range(test_time):
         Rs, ts, confidences = split_matches_and_remove_less_confidence(
             kps1, kps2, matches, K, split_num, thres)
 
-    duration_ms_lsd = (cv2.getTickCount() - start_lsd) * 1000 / freq / test_num
+    duration_ms_lsd = (cv2.getTickCount() - start_lsd) * 1000 / freq / test_time
     print("Elapsed time for split_matches_and_remove_less_confidence: {} ms".
           format(duration_ms_lsd))
 
-    zyxs_ts = get_zyxs_ts(Rs, ts)
-
-    print("The answers num:{} of total:{}".format(
-        len(Rs), len(matches) // split_num))
-    for R, t, con in zip(Rs, ts, confidences):
-        print("=============")
-        print("Confidence:{}".format(con))
-        pe_utils.DEBUG_Rt(R, t, con)
-        print("=============")
-
-    zyxs_ts_mean = mean_zyxs_ts(zyxs_ts)
-    print("rs_ts_mean:{}".format(zyxs_ts_mean))
-
-    return Rs, ts, confidences, zyxs_ts_mean
+    return Rs, ts, confidences
 
 
 def print_out(zyxs_ts,
@@ -231,7 +222,8 @@ def print_out(zyxs_ts,
 
     import os
     if os.path.isdir(folder_name):
-        print("Folder:{} already exists, maybe overwriting!!".format(folder_name))
+        print(
+            "Folder:{} already exists, maybe overwriting!!".format(folder_name))
     else:
         print("Going to create folder: {}".format(folder_name))
         os.mkdir(folder_name)
@@ -266,11 +258,14 @@ def process(im1_file, im2_file, im1_file_name_short, im2_file_name_short, K):
 
     print("In process, {}-{}".format(im1_file, im2_file))
 
-    im1 = cv2.imread(im1_file, 0)
-    im2 = cv2.imread(im2_file, 0)
+    im1_color = cv2.imread(im1_file)
+    im2_color = cv2.imread(im2_file)
+    im1 = cv2.cvtColor(im1_color, cv2.COLOR_BGR2GRAY)
+    im2 = cv2.cvtColor(im2_color, cv2.COLOR_BGR2GRAY)
 
     feature_detector, descriptor_extractor, _ = kd_utils.get_feature_detector_descriptor_extractor(
         "ORB", feature_detector_params=dict(nfeatures=2000))
+
     kps1, des1 = kd_utils.get_keypoints_and_descripotrs(
         feature_detector, descriptor_extractor, im1)
     kps2, des2 = kd_utils.get_keypoints_and_descripotrs(
@@ -280,11 +275,11 @@ def process(im1_file, im2_file, im1_file_name_short, im2_file_name_short, K):
     all_matches = kd_utils.match_with_type(
         matcher, des1, des2, normType=cv2.NORM_HAMMING)
 
-    print("kps1:{}, kps2:{}, matches:{}".format(len(kps1), len(kps2), len(all_matches)))
+    print("kps1:{}, kps2:{}, matches:{}".format(
+        len(kps1), len(kps2), len(all_matches)))
 
-    # test_remove_less_confidence_time()
-    Rs, ts, confidences, zyxs_ts_mean = test_remove_less_confidence(
-        kps1, kps2, all_matches, K, split_num=100, thres=0.7)
+    Rs, ts, confidences = test_remove_less_confidence(
+        kps1, kps2, all_matches, K, split_num=100, thres=0.7, test_time=1)
 
     zyxs_ts = get_zyxs_ts(Rs, ts)
     zyxs_ts_refine_list = get_nice_and_constant_zyxs_ts_list(zyxs_ts)
@@ -298,42 +293,28 @@ def process(im1_file, im2_file, im1_file_name_short, im2_file_name_short, K):
 
 
 def run():
-    import argparse
-
-    # construct the argument parse and parse the arguments
-    ap = argparse.ArgumentParser()
-    ap.add_argument(
-        "-l", "--image1", required=True, help="path to input image1")
-    ap.add_argument(
-        "-r", "--image2", required=True, help="path to input image2")
-    args = vars(ap.parse_args())
 
     base_dir = "H:/projects/SLAM/python_code/dataset/our/trajs2/"
-
-    im1_file = base_dir + args["image1"]
-    im2_file = base_dir + args["image2"]
-
-    # print("{}\n{}".format(im1_file, im2_file))
-    print("{}\n{}".format(args["image1"], args["image2"]))
 
     K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935],
                   [0, 0, 1]])    # Canon5DMarkIII-EF50mm
 
-    # process(im1_file, im2_file, K)
-
     strs = [str(x) for x in range(1, 10)]
     strs.extend(['1a', '1b', '1c', '4a', '7a', '7b'])
+    #strs = sorted(strs)
+
+    strs = strs[:2]
 
     for i in range(len(strs) - 1):
         for j in range(i + 1, len(strs)):
-
+            im1_file = base_dir + strs[i] + ".jpg"
+            im2_file = base_dir + strs[j] + ".jpg"
             try:
-
-                im1_file = base_dir + strs[i] + ".jpg"
-                im2_file = base_dir + strs[j] + ".jpg"
-                process(im1_file, im2_file, strs[i] + '-', strs[j], K)
+                process(im1_file, im2_file, strs[i], strs[j], K)
                 # input()
             except:
+                print("Somthing went wrong when calc {} and {}".format(
+                    im1_file, im2_file))
                 continue
 
 

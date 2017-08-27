@@ -153,6 +153,9 @@ def get_keypoints_and_descripotrs(feature_detector, descriptor_extractor, img):
 
     kps = feature_detector.detect(img)
     keypoints, descriptors = descriptor_extractor.compute(img, kps)
+    print(
+        "In get_keypoints_and_descripotrs, keypoints num after detect:{}, after compute:{}, des num:{}".
+        format(len(kps), len(keypoints), len(descriptors)))
     return keypoints, descriptors
 
 
@@ -173,8 +176,8 @@ def match_with_type(matcher, des1, des2, normType=cv2.NORM_L2):
 
         matches_good = list(filter(lambda x: x.distance <= prune_dis, matches))
 
-        print(
-            "Matches with prune:{}->{}".format(len(matches), len(matches_good)))
+        print("Matches with NORM_HAMMING after prune:{}->{}".format(
+            len(matches), len(matches_good)))
 
     else:
         # NORM_L2
@@ -186,7 +189,7 @@ def match_with_type(matcher, des1, des2, normType=cv2.NORM_L2):
             if m.distance < 0.7 * n.distance:
                 matches_good.append(m)
 
-        print("Matches with ratio test:{}->{}".format(
+        print("Matches with NORM_L2 after ratio test:{}->{}".format(
             len(matches), len(matches_good)))
 
     return matches_good

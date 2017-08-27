@@ -14,6 +14,7 @@ import pose_estimation_utils as pe_utils
 import keypoints_descriptors_utils as kd_utils
 import os
 
+
 class Image:
     """Image
         We use a class to store the image informations
@@ -91,15 +92,16 @@ class CameraRelocation:
             print("Load the left image")
             self.load_image_left(new_frame_name)
             return
-        else:
-            print("Load the right image")
-            self.load_image_right(new_frame_name)
+
+        # NOT the first one
+        print("Load the right image")
+        self.load_image_right(new_frame_name)
 
         self._get_keypoints_and_descripotrs()
         self._get_matches()
-        self._find_fundamental_matrix()
-        self._find_essential_matrix()
-        self._find_camera_matrices_rt()
+        # self._find_fundamental_matrix()
+        # self._find_essential_matrix()
+        # self._find_camera_matrices_rt()
         self._refine_rt_with_ransac()
 
     def load_image_left(self, img_path):
@@ -136,7 +138,8 @@ class CameraRelocation:
             featurename, descriptor_extractor_name, feature_detector_params,
             descriptor_extractor_params)
 
-        self.set_matcher() # to make sure we won't forget by do it more than one
+        self.set_matcher(
+        )    # to make sure we won't forget by do it more than one
 
     def set_matcher(self, withFlann=False):
         self.matcher = kd_utils.get_matcher(self.normType, withFlann)
@@ -203,11 +206,12 @@ class CameraRelocation:
 
             pe_utils.DEBUG_Rt(self.R, self.t, "R t from linear algebra")
 
-
     def _refine_rt_with_ransac(self, split_num=100, thres=0.7):
         from ransac_Rt import split_matches_and_remove_less_confidence, get_zyxs_ts, get_nice_and_constant_zyxs_ts_list, print_out
 
-        Rs, ts, confidences = split_matches_and_remove_less_confidence(self.img1.key_points, self.img2.key_points, self.matches, self.K, split_num, thres)
+        Rs, ts, confidences = split_matches_and_remove_less_confidence(
+            self.img1.key_points, self.img2.key_points, self.matches, self.K,
+            split_num, thres)
 
         zyxs_ts = get_zyxs_ts(Rs, ts)
         zyxs_ts_refine_list = get_nice_and_constant_zyxs_ts_list(zyxs_ts)

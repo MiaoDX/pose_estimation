@@ -151,7 +151,7 @@ def recoverPose_from_E_cv3(E, kps1, kps2, matches, K):
     matches_rp_bad = []
     for i in range(len(matches)):
         if mask_rp[i] != 0:
-            assert mask_rp[i] == 255 # this is special, pretty special
+            assert mask_rp[i] == 255    # this is special, pretty special
             matches_rp.append(matches[i])
         else:
             matches_rp_bad.append(matches[i])
