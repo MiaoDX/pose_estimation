@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import imutils
 import pose_estimation_utils as pe_utils
 import keypoints_descriptors_utils as kd_utils
-
+import os
 
 class Image:
     """Image
@@ -31,6 +31,8 @@ class Image:
         # self.P = None
         self.R = None
         self.t = None
+        if img_name is not None:
+            self.base_name = os.path.basename(img_name).split('.')[0]
 
     def set_matches(self, mathces):
         self.matches = mathces
@@ -64,7 +66,7 @@ class CameraRelocation:
         this project.
     """
 
-    def __init__(self, K, dist, feature_name="ORB"):
+    def __init__(self, K, dist, feature_name="ORB", output_folder='output'):
         """Constructor
 
             This method initializes the scene reconstruction algorithm.
@@ -75,35 +77,36 @@ class CameraRelocation:
         self.K = K
         self.K_inv = np.linalg.inv(K)    # store inverse for fast access
         self.d = dist
-
+        self.output_folder = output_folder
         self.img1 = Image()
         self.img2 = Image()
 
         # Ready to go
         self.set_feature_detector_descriptor_extractor(feature_name)
-        self.set_matcher(withFlann=False)
+        # self.set_matcher(withFlann=False) # already in set_feature_detector_descriptor_extractor
 
     def forward(self, new_frame_name):
 
         if self.img1.img_name is None:
             print("Load the left image")
-            self._load_image_left(new_frame_name)
+            self.load_image_left(new_frame_name)
             return
         else:
             print("Load the right image")
-            self._load_image_right(new_frame_name)
+            self.load_image_right(new_frame_name)
 
         self._get_keypoints_and_descripotrs()
         self._get_matches()
         self._find_fundamental_matrix()
         self._find_essential_matrix()
         self._find_camera_matrices_rt()
+        self._refine_rt_with_ransac()
 
-    def _load_image_left(self, img_path):
+    def load_image_left(self, img_path):
         img_color, img_gray = self._load_image(img_path)
         self.img1 = Image(img_path, img_color, img_gray)
 
-    def _load_image_right(self, img_path):
+    def load_image_right(self, img_path):
         img_color, img_gray = self._load_image(img_path)
         self.img2 = Image(img_path, img_color, img_gray)
 
@@ -132,6 +135,8 @@ class CameraRelocation:
         self.feature_detector, self.descriptor_extractor, self.normType = kd_utils.get_feature_detector_descriptor_extractor(
             featurename, descriptor_extractor_name, feature_detector_params,
             descriptor_extractor_params)
+
+        self.set_matcher() # to make sure we won't forget by do it more than one
 
     def set_matcher(self, withFlann=False):
         self.matcher = kd_utils.get_matcher(self.normType, withFlann)
@@ -197,3 +202,20 @@ class CameraRelocation:
                 self.matches_E, self.K)
 
             pe_utils.DEBUG_Rt(self.R, self.t, "R t from linear algebra")
+
+
+    def _refine_rt_with_ransac(self, split_num=100, thres=0.7):
+        from ransac_Rt import split_matches_and_remove_less_confidence, get_zyxs_ts, get_nice_and_constant_zyxs_ts_list, print_out
+
+        Rs, ts, confidences = split_matches_and_remove_less_confidence(self.img1.key_points, self.img2.key_points, self.matches, self.K, split_num, thres)
+
+        zyxs_ts = get_zyxs_ts(Rs, ts)
+        zyxs_ts_refine_list = get_nice_and_constant_zyxs_ts_list(zyxs_ts)
+
+        print_out(
+            zyxs_ts,
+            confidences,
+            zyxs_ts_refine_list,
+            im1_file_name=self.img1.base_name,
+            im2_file_name=self.img2.base_name,
+            folder_name=self.output_folder)

@@ -73,7 +73,7 @@ def split_matches_and_remove_less_confidence(kps1,
     for chosen_matches in splited_matches:
         if len(chosen_matches) < 5:
             print("Less than 5 points, just return")
-            return
+            break
 
         E, matches_E, _ = pe_utils.find_E_and_matches_cv3(
             kps1, kps2, chosen_matches, K)
@@ -224,15 +224,29 @@ def print_out(zyxs_ts,
               confidences,
               zyxs_ts_refine_list,
               im1_file_name="im1",
-              im2_file_name="im2"):
+              im2_file_name="im2",
+              folder_name='.'):
+    folder_name += '/'
+    file_name = folder_name + im1_file_name + '-' + im2_file_name + '.txt'
+
+    import os
+    if os.path.isdir(folder_name):
+        print("Folder:{} already exists, maybe overwriting!!".format(folder_name))
+    else:
+        print("Going to create folder: {}".format(folder_name))
+        os.mkdir(folder_name)
+
+    if os.path.isfile(file_name):
+        print("File already exists, maybe overwriting!!")
+
     import sys
     savedStdout = sys.stdout    # 保存标准输出流
 
-    with open(im1_file_name + im2_file_name + '.txt', 'w') as f:
+    with open(file_name, 'w') as f:
         sys.stdout = f    # 标准输出重定向至文件
 
-        np.set_printoptions(precision=6)
-        print(im1_file_name + im2_file_name)
+        np.set_printoptions(precision=5)
+        print(im1_file_name + '-' + im2_file_name)
         print("zyxs_ts_and_confidences:\n")
 
         zyxs_ts_confs = np.concatenate(
@@ -249,6 +263,9 @@ def print_out(zyxs_ts,
 
 
 def process(im1_file, im2_file, im1_file_name_short, im2_file_name_short, K):
+
+    print("In process, {}-{}".format(im1_file, im2_file))
+
     im1 = cv2.imread(im1_file, 0)
     im2 = cv2.imread(im2_file, 0)
 
@@ -262,6 +279,8 @@ def process(im1_file, im2_file, im1_file_name_short, im2_file_name_short, K):
     matcher = kd_utils.get_matcher(cv2.NORM_HAMMING)
     all_matches = kd_utils.match_with_type(
         matcher, des1, des2, normType=cv2.NORM_HAMMING)
+
+    print("kps1:{}, kps2:{}, matches:{}".format(len(kps1), len(kps2), len(all_matches)))
 
     # test_remove_less_confidence_time()
     Rs, ts, confidences, zyxs_ts_mean = test_remove_less_confidence(
@@ -320,10 +339,11 @@ def run():
 
 if __name__ == "__main__":
 
-    DOCTEST = True
+    DOCTEST_DEPRESS_PRINT = False
 
     import doctest
-    if DOCTEST:
+    if DOCTEST_DEPRESS_PRINT:
         print = lambda *args, **kwargs: None    # we are doing this to suppress the output, so we can do it easy for testing doc
     doctest.testmod(verbose=True)
-    # doctest.testmod()
+
+    run()

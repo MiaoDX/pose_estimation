@@ -38,24 +38,32 @@ def test_camera_relocation():
 
     base_dir = "H:/projects/SLAM/python_code/dataset/our/trajs2/"
 
-    im1_file = base_dir + '1.jpg'
-    im2_file = base_dir + '2.jpg'
-    im3_file = base_dir + '3.jpg'
-    im4_file = base_dir + '4.jpg'
 
-    im_files = [im1_file, im2_file, im3_file, im4_file]
+    #cameraRelocation = CameraRelocation(K, d, feature_name="BRIEF")
+    cameraRelocation = CameraRelocation(K, d, feature_name="ORB",output_folder="20170827")
 
-    cameraRelocation = CameraRelocation(K, d, feature_name="BRIEF")
-    #cameraRelocation = CameraRelocation(K, d, feature_name="ORB")
+    cameraRelocation.set_feature_detector_descriptor_extractor("ORB", None, dict(nfeatures=2000))
+    #cameraRelocation.set_matcher(True) # this already set with the set fd and de
 
-    #cameraRelocation.set_feature_detector_descriptor_extractor("ORB", None, dict(nfeatures=1000))
-    #cameraRelocation.set_matcher(True) # this should use along with the set fd and de
 
-    #cameraRelocation.forward(im1_file)
-    #cameraRelocation.forward(im2_file)
 
-    for im_file in im_files[:2]:
-        cameraRelocation.forward(im_file)
+    strs = [str(x) for x in range(1, 10)]
+    strs.extend(['1a', '1b', '1c', '4a', '7a', '7b'])
+    #strs = sorted(strs)
+
+    for i in range(len(strs) - 1):
+        im1_file = base_dir + strs[i] + ".jpg"
+        print("Using {} as the reference image".format(im1_file))
+
+        cameraRelocation.load_image_left(im1_file)
+        for j in range(i + 1, len(strs)):
+            im2_file = base_dir + strs[j] + ".jpg"
+            print("Using {} as the testing image".format(im2_file))
+            try:
+                cameraRelocation.forward(im2_file)
+            except:
+                print("Somthing went wrong when calc {} and {}".format(im1_file, im2_file))
+                continue
 
 
 if __name__ == '__main__':
