@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
 Usage: python ransac_Rt.py -l 1.jpg -r 2.jpg
 
@@ -34,11 +33,37 @@ import pose_estimation_utils as pe_utils
 
 
 def split_the_matches(matches, step):
+    """
+
+    :param matches:
+    :param step:
+    :return:
+    >>> l = list(range(12)) # note, the input should be matches list, however, that is not so easy to mock
+    >>> sl = split_the_matches(l, 4) # the last will be []
+    >>> sl = list(sl)
+    >>> len(sl)
+    4
+    >>> sl[0]
+    [0, 1, 2, 3]
+    >>> sl_2 = split_the_matches(l, 5)
+    >>> sl_2 = list(sl_2)
+    >>> len(sl_2)
+    3
+    >>> sl_2[0]
+    [0, 1, 2, 3, 4]
+    """
     for i in range(len(matches) // step + 1):
         yield matches[i * step:(i + 1) * step]
 
 
-def split_matches_and_remove_less_confidence(kps1, kps2, matches, K, splitnum, conf_thresh=0.7):
+def split_matches_and_remove_less_confidence(kps1,
+                                             kps2,
+                                             matches,
+                                             K,
+                                             splitnum,
+                                             conf_thresh=0.7):
+    assert kps1 is not None and kps2 is not None and matches is not None and K is not None
+
     Rs = []
     ts = []
     confidences = []
@@ -50,9 +75,11 @@ def split_matches_and_remove_less_confidence(kps1, kps2, matches, K, splitnum, c
             print("Less than 5 points, just return")
             return
 
-        E, matches_E, _ = pe_utils.find_E_and_matches_cv3(kps1, kps2, chosen_matches, K)
+        E, matches_E, _ = pe_utils.find_E_and_matches_cv3(
+            kps1, kps2, chosen_matches, K)
 
-        R, t, matches_rp, matches_rp_bad = pe_utils.recoverPose_from_E_cv3(E, kps1, kps2, matches_E, K)
+        R, t, matches_rp, matches_rp_bad = pe_utils.recoverPose_from_E_cv3(
+            E, kps1, kps2, matches_E, K)
 
         conf = len(matches_rp) / len(chosen_matches)
         if conf >= conf_thresh:
@@ -64,6 +91,10 @@ def split_matches_and_remove_less_confidence(kps1, kps2, matches, K, splitnum, c
 
 
 def get_zyxs_ts(Rs, ts):
+    assert Rs is not None and ts is not None
+    assert Rs[0].shape == (3, 3)
+    assert ts[0].shape == (3, 1)
+
     zyxs = pe_utils.Rs2zyxs(Rs)
     zyxs_ts = np.hstack([zyxs, ts]).reshape(len(zyxs), 6)
 
@@ -71,7 +102,18 @@ def get_zyxs_ts(Rs, ts):
 
 
 def mean_zyxs_ts(zyxs_ts):
-    return zyxs_ts.mean(axis=0)
+    """
+    :param zyxs_ts:
+    :return:
+    >>> zyxs_ts = np.array(range(6)).reshape(1,6)
+    >>> list(np.int8(mean_zyxs_ts(zyxs_ts))) # use int for easy compare
+    [0, 1, 2, 3, 4, 5]
+    >>> zyxs_ts = np.array(range(12)).reshape(2,6)
+    >>> list(np.int8(mean_zyxs_ts(zyxs_ts))) # use int for easy compare
+    [3, 4, 5, 6, 7, 8]
+    """
+    assert zyxs_ts[0].shape == (6,)
+    return zyxs_ts.mean(axis=0)    # mean in vertical
 
 
 def AgglomerativeClustering_linkage_average(X, cluster_num):
@@ -80,12 +122,28 @@ def AgglomerativeClustering_linkage_average(X, cluster_num):
     :param X:
     :param cluster_num:
     :return:
+    >>> a1 = [0, 0, 0, 0, 0, 0]
+    >>> a2 = [0, 0, 0, 0, 1, 0]
+    >>> a3 = [0, 0, 0, 0, 0, 1]
+    >>> a4 = [0, 0, 0, 0, -1, 0]
+    >>> a5 = [0, 0, 0, 0, 0, -1]  # above are alike
+
+    >>> a6 = [0, 0, 0, 0, 10, 0]
+    >>> a7 = [0, 0, 0, 0, 0, 10]
+    >>> a8 = [0, 0, 0, 0, -10, 0]
+    >>> a9 = [0, 0, 0, 0, 0, -10]
+
+    >>> X = [a1, a2, a3, a4, a5, a5, a6, a7, a8, a9]
+    >>> ag1 = AgglomerativeClustering_linkage_average(X, 2) #doctest: +ELLIPSIS
+    >>> ag1[:5] == list(np.ones(5)*ag1[0])
+    True
     """
     from time import time
     from sklearn.cluster import AgglomerativeClustering
 
     print("cluster_num:", cluster_num)
-    clustering = AgglomerativeClustering(linkage='average', n_clusters=cluster_num)
+    clustering = AgglomerativeClustering(
+        linkage='average', n_clusters=cluster_num)
     t0 = time()
     clustering.fit(X)
     print("Using linkage {}, time cost {}".format('average', time() - t0))
@@ -109,7 +167,8 @@ def get_nice_and_constant_zyxs_ts_list(zyxs_ts, accept_mode_ration=0.6):
     last_chosen_index_list = list(range(all_len))
     for i in range(2, 6):
         new_labels = AgglomerativeClustering_linkage_average(zyxs_ts, i)
-        chosen_index_list = get_intersection_label_index(new_labels, last_chosen_index_list)
+        chosen_index_list = get_intersection_label_index(
+            new_labels, last_chosen_index_list)
 
         if len(chosen_index_list) / all_len < accept_mode_ration:
             break
@@ -131,20 +190,24 @@ def get_nice_and_constant_zyxs_ts_list(zyxs_ts, accept_mode_ration=0.6):
 import keypoints_descriptors_utils as kd_utils
 
 
-def test_remove_less_confidence(kps1, kps2, matches, K, split_num=50, thres=0.7):
+def test_remove_less_confidence(kps1, kps2, matches, K, split_num=50,
+                                thres=0.7):
     start_lsd = cv2.getTickCount()
     freq = cv2.getTickFrequency()
 
     test_num = 10
     for i in range(test_num):
-        Rs, ts, confidences = split_matches_and_remove_less_confidence(kps1, kps2, matches, K, split_num, thres)
+        Rs, ts, confidences = split_matches_and_remove_less_confidence(
+            kps1, kps2, matches, K, split_num, thres)
 
     duration_ms_lsd = (cv2.getTickCount() - start_lsd) * 1000 / freq / test_num
-    print("Elapsed time for split_matches_and_remove_less_confidence: {} ms".format(duration_ms_lsd))
+    print("Elapsed time for split_matches_and_remove_less_confidence: {} ms".
+          format(duration_ms_lsd))
 
     zyxs_ts = get_zyxs_ts(Rs, ts)
 
-    print("The answers num:{} of total:{}".format(len(Rs), len(matches) // split_num))
+    print("The answers num:{} of total:{}".format(
+        len(Rs), len(matches) // split_num))
     for R, t, con in zip(Rs, ts, confidences):
         print("=============")
         print("Confidence:{}".format(con))
@@ -157,62 +220,73 @@ def test_remove_less_confidence(kps1, kps2, matches, K, split_num=50, thres=0.7)
     return Rs, ts, confidences, zyxs_ts_mean
 
 
-def print_out(zyxs_ts, confidences, zyxs_ts_refine_list, im1_file_name="im1", im2_file_name="im2"):
+def print_out(zyxs_ts,
+              confidences,
+              zyxs_ts_refine_list,
+              im1_file_name="im1",
+              im2_file_name="im2"):
     import sys
-    savedStdout = sys.stdout  # 保存标准输出流
+    savedStdout = sys.stdout    # 保存标准输出流
 
     with open(im1_file_name + im2_file_name + '.txt', 'w') as f:
-        sys.stdout = f  # 标准输出重定向至文件
+        sys.stdout = f    # 标准输出重定向至文件
 
         np.set_printoptions(precision=6)
         print(im1_file_name + im2_file_name)
         print("zyxs_ts_and_confidences:\n")
 
-        zyxs_ts_confs = np.concatenate((zyxs_ts, confidences.reshape(len(zyxs_ts), 1)), axis=1)
+        zyxs_ts_confs = np.concatenate(
+            (zyxs_ts, confidences.reshape(len(zyxs_ts), 1)), axis=1)
 
         print(zyxs_ts_confs)
 
         print("mean_zyxs_ts:{}".format(mean_zyxs_ts(zyxs_ts)))
         print(zyxs_ts_refine_list)
-        print("zyxs_ts_refine_mean:{}".format(mean_zyxs_ts(zyxs_ts_refine_list)))
+        print(
+            "zyxs_ts_refine_mean:{}".format(mean_zyxs_ts(zyxs_ts_refine_list)))
 
-    sys.stdout = savedStdout  # 恢复标准输出流
+    sys.stdout = savedStdout    # 恢复标准输出流
 
 
 def process(im1_file, im2_file, im1_file_name_short, im2_file_name_short, K):
     im1 = cv2.imread(im1_file, 0)
     im2 = cv2.imread(im2_file, 0)
 
-    feature_detector, descriptor_extractor, _ = kd_utils.get_feature_detector_descriptor_extractor("ORB",
-                                                                                                   feature_detector_params=dict(
-                                                                                                       nfeatures=2000))
-    kps1, des1 = kd_utils.get_keypoints_and_descripotrs(feature_detector, descriptor_extractor, im1)
-    kps2, des2 = kd_utils.get_keypoints_and_descripotrs(feature_detector, descriptor_extractor, im2)
+    feature_detector, descriptor_extractor, _ = kd_utils.get_feature_detector_descriptor_extractor(
+        "ORB", feature_detector_params=dict(nfeatures=2000))
+    kps1, des1 = kd_utils.get_keypoints_and_descripotrs(
+        feature_detector, descriptor_extractor, im1)
+    kps2, des2 = kd_utils.get_keypoints_and_descripotrs(
+        feature_detector, descriptor_extractor, im2)
 
     matcher = kd_utils.get_matcher(cv2.NORM_HAMMING)
-    all_matches = kd_utils.match_with_type(matcher, des1, des2, normType=cv2.NORM_HAMMING)
+    all_matches = kd_utils.match_with_type(
+        matcher, des1, des2, normType=cv2.NORM_HAMMING)
 
     # test_remove_less_confidence_time()
-    Rs, ts, confidences, zyxs_ts_mean = test_remove_less_confidence(kps1, kps2, all_matches, K, split_num=100,
-                                                                    thres=0.7)
+    Rs, ts, confidences, zyxs_ts_mean = test_remove_less_confidence(
+        kps1, kps2, all_matches, K, split_num=100, thres=0.7)
 
     zyxs_ts = get_zyxs_ts(Rs, ts)
     zyxs_ts_refine_list = get_nice_and_constant_zyxs_ts_list(zyxs_ts)
 
-    print_out(zyxs_ts, confidences, zyxs_ts_refine_list, im1_file_name=im1_file_name_short,
-              im2_file_name=im2_file_name_short)
+    print_out(
+        zyxs_ts,
+        confidences,
+        zyxs_ts_refine_list,
+        im1_file_name=im1_file_name_short,
+        im2_file_name=im2_file_name_short)
 
 
-if __name__ == "__main__":
-
+def run():
     import argparse
 
     # construct the argument parse and parse the arguments
     ap = argparse.ArgumentParser()
-    ap.add_argument("-l", "--image1", required=True,
-                    help="path to input image1")
-    ap.add_argument("-r", "--image2", required=True,
-                    help="path to input image2")
+    ap.add_argument(
+        "-l", "--image1", required=True, help="path to input image1")
+    ap.add_argument(
+        "-r", "--image2", required=True, help="path to input image2")
     args = vars(ap.parse_args())
 
     base_dir = "H:/projects/SLAM/python_code/dataset/our/trajs2/"
@@ -223,7 +297,8 @@ if __name__ == "__main__":
     # print("{}\n{}".format(im1_file, im2_file))
     print("{}\n{}".format(args["image1"], args["image2"]))
 
-    K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935], [0, 0, 1]])  # Canon5DMarkIII-EF50mm
+    K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935],
+                  [0, 0, 1]])    # Canon5DMarkIII-EF50mm
 
     # process(im1_file, im2_file, K)
 
@@ -241,3 +316,14 @@ if __name__ == "__main__":
                 # input()
             except:
                 continue
+
+
+if __name__ == "__main__":
+
+    DOCTEST = True
+
+    import doctest
+    if DOCTEST:
+        print = lambda *args, **kwargs: None    # we are doing this to suppress the output, so we can do it easy for testing doc
+    doctest.testmod(verbose=True)
+    # doctest.testmod()

@@ -18,26 +18,7 @@ from scene3D import CameraRelocation
 
 
 def main():
-    # camera matrix and distortion coefficients
-    # can be recovered with calibrate.py
-    # but the examples used here are already undistorted, taken with a camera
-    # of known K
-
-    # K = np.array([[2759.48/4, 0, 1520.69/4, 0, 2764.16/4,
-    #                1006.81/4, 0, 0, 1]]).reshape(3, 3)
-
-    K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935],
-                  [0, 0, 1]])    # Canon5DMarkIII-EF50mm
-
-    d = np.array([0.0, 0.0, 0.0, 0.0, 0.0]).reshape(1, 5)
-    #scene = SceneReconstruction3D(K, d)
-
-    # load a pair of images for which to perform SfM
-    #scene.load_image_pair("fountain_dense/0004.png", "fountain_dense/0005.png")
-    #scene.load_image_pair("H:/projects/SLAM/python_code/dataset/our/trajs2/1.jpg", "H:/projects/SLAM/python_code/dataset/our/trajs2/4.jpg")
-
-    # when these is activated, the plot_point_cloud fail somewhat
-
+    pass
     #scene.plot_optic_flow()
     #scene.draw_epipolar_lines()
     #scene.plot_rectified_images(feat_mode="orb")
@@ -65,6 +46,7 @@ def test_camera_relocation():
     im_files = [im1_file, im2_file, im3_file, im4_file]
 
     cameraRelocation = CameraRelocation(K, d, feature_name="BRIEF")
+    #cameraRelocation = CameraRelocation(K, d, feature_name="ORB")
 
     #cameraRelocation.set_feature_detector_descriptor_extractor("ORB", None, dict(nfeatures=1000))
     #cameraRelocation.set_matcher(True) # this should use along with the set fd and de

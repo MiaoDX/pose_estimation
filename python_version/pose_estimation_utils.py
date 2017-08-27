@@ -11,6 +11,7 @@ from linear_algebra_helper import cheirality_check
 
 
 def R2yzx(R):
+    assert R.shape == (3, 3)
     """
     http://www.cnblogs.com/singlex/p/RotateMatrix2Euler.html
     :param R:
@@ -31,6 +32,7 @@ def R2yzx(R):
 
 
 def Rs2zyxs(Rs):
+    assert Rs is not None
     zyxs = []
     for R in Rs:
         zyxs.append(R2yzx(R))
@@ -53,6 +55,9 @@ def DEBUG_Rt(R, t, name=""):
 
 def key_points_to_matched_pixel_points(first_key_points, second_key_points,
                                        matches):
+    assert first_key_points is not None and second_key_points is not None and matches is not None
+    assert len(first_key_points) >= len(matches) and len(
+        second_key_points) >= len(matches)
 
     first_match_points = np.zeros((len(matches), 2), dtype=np.float32)
     second_match_points = np.zeros_like(first_match_points)
@@ -66,6 +71,8 @@ def key_points_to_matched_pixel_points(first_key_points, second_key_points,
 
 
 def find_F_and_matches(kps1, kps2, matches):
+    assert kps1 is not None and kps2 is not None and matches is not None
+    assert len(kps1) >= len(matches) and len(kps2) >= len(matches)
 
     pts1, pts2, _ = key_points_to_matched_pixel_points(kps1, kps2, matches)
 
@@ -91,6 +98,9 @@ def find_F_and_matches(kps1, kps2, matches):
 
 
 def find_E_and_matches_cv2(kp1, kp2, matches, K):
+    assert kp1 is not None and kp2 is not None and matches is not None and K is not None
+    assert len(kp1) >= len(matches) and len(kp2) >= len(matches)
+
     F, matches_F, matches_F_bad = find_F_and_matches(kp1, kp2, matches)
     E = K.T.dot(F).dot(K)
 
@@ -98,6 +108,8 @@ def find_E_and_matches_cv2(kp1, kp2, matches, K):
 
 
 def find_E_and_matches_cv3(kp1, kp2, matches, K):
+    assert kp1 is not None and kp2 is not None and matches is not None and K is not None
+    assert len(kp1) >= len(matches) and len(kp2) >= len(matches)
 
     pts1, pts2, _ = key_points_to_matched_pixel_points(kp1, kp2, matches)
     """ findEssentialMat(points1, points2, cameraMatrix[, method[, prob[, threshold[, mask]]]]) -> retval, mask """
@@ -123,6 +135,8 @@ def find_E_and_matches_cv3(kp1, kp2, matches, K):
 
 
 def recoverPose_from_E_cv3(E, kps1, kps2, matches, K):
+    assert E is not None and kps1 is not None and kps2 is not None and matches is not None and K is not None
+    assert len(kps1) >= len(matches) and len(kps2) >= len(matches)
 
     pts1, pts2, _ = key_points_to_matched_pixel_points(kps1, kps2, matches)
 
@@ -148,7 +162,7 @@ def recoverPose_from_E_cv3(E, kps1, kps2, matches, K):
 
 
 def points_pixel_to_camera(pts1, pts2, K_inv):
-    assert len(pts1) == len(pts2)
+    assert pts1 is not None and pts2 is not None and K_inv is not None
 
     pts1_cam = []
     pts2_cam = []
@@ -162,6 +176,8 @@ def points_pixel_to_camera(pts1, pts2, K_inv):
 
 
 def recoverPose_from_E_cv2(E, kps1, kps2, matches, K):
+    assert E is not None and kps1 is not None and kps2 is not None and matches is not None and K is not None
+    assert len(kps1) >= len(matches) and len(kps2) >= len(matches)
 
     # iterate over all point correspondences used in the estimation of the
     # fundamental matrix

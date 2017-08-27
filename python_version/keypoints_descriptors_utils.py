@@ -48,7 +48,7 @@ def get_feature_detector_descriptor_extractor(feature_detector_name=str(),
             descriptor_extractor_params) == 0
         if imutils.is_cv2():
             feature_detector = cv2.StarDetector(**feature_detector_params)
-            #descriptor_extractor = cv2.BriefDescriptorExtractor(**descriptor_extractor_params)
+            #descriptor_extractor = cv2.BriefDescriptorExtractor(**descriptor_extractor_params) # seems not working
             descriptor_extractor = cv2.DescriptorExtractor_create("BRIEF")
         else:
             feature_detector = cv2.xfeatures2d.StarDetector_create(
@@ -116,19 +116,21 @@ def get_matcher(normType=cv2.NORM_L2, withFlann=False):
         index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
         return cv2.FlannBasedMatcher(index_params, search_params)
 
+    # =========================
     # normType == NORM_HAMMING
+    # =========================
 
     index_params_orb = dict(
         algorithm=FLANN_INDEX_LSH,
-        table_number=6,    # 12
-        key_size=12,    # 20
-        multi_probe_level=1)    # 2
+        table_number=6,
+        key_size=12,
+        multi_probe_level=1)
 
     index_params_orb2 = dict(
         algorithm=FLANN_INDEX_LSH,
-        table_number=12,    # 12
-        key_size=20,    # 20
-        multi_probe_level=2)    # 2
+        table_number=12,
+        key_size=20,
+        multi_probe_level=2)
     """
     # FAILED
     index_params_auto = dict(algorithm=FLANN_INDEX_AUTOTUNED,
@@ -144,14 +146,19 @@ def get_matcher(normType=cv2.NORM_L2, withFlann=False):
 
 
 def get_keypoints_and_descripotrs(feature_detector, descriptor_extractor, img):
-    #kps = feature_detector.detect(img, None)
+    # we use detect and compute separately since the detector and extractor can be different
+    assert feature_detector is not None
+    assert descriptor_extractor is not None
+    assert img is not None
+
     kps = feature_detector.detect(img)
-    # NOTE: it will output another key-points, but the are presenting the same thing
     keypoints, descriptors = descriptor_extractor.compute(img, kps)
     return keypoints, descriptors
 
 
 def match_with_type(matcher, des1, des2, normType=cv2.NORM_L2):
+    assert isinstance(matcher, cv2.FlannBasedMatcher().__class__) or isinstance(
+        matcher, cv2.BFMatcher().__class__)
 
     if normType == cv2.NORM_HAMMING:
         # Match descriptors.
