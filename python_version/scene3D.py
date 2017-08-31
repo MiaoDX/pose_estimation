@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import imutils
 import pose_estimation_utils as pe_utils
 import keypoints_descriptors_utils as kd_utils
+import depth_estimation
 import os
 
 
@@ -82,9 +83,16 @@ class CameraRelocation:
         self.img1 = Image()
         self.img2 = Image()
 
+        self.R = np.ones((3,3))
+        self.t = np.ones((3,1))
+
+
         # Ready to go
         self.set_feature_detector_descriptor_extractor(feature_name)
         # self.set_matcher(withFlann=False) # already in set_feature_detector_descriptor_extractor
+
+
+
 
     def forward(self, new_frame_name):
 
@@ -100,9 +108,10 @@ class CameraRelocation:
         self._get_keypoints_and_descripotrs()
         self._get_matches()
         # self._find_fundamental_matrix()
-        # self._find_essential_matrix()
-        # self._find_camera_matrices_rt()
-        self._refine_rt_with_ransac()
+        self._find_essential_matrix()
+        self._find_camera_matrices_rt()
+        # self._refine_rt_with_ransac()
+        self._plot_point_cloud()
 
     def load_image_left(self, img_path):
         img_color, img_gray = self._load_image(img_path)
@@ -223,3 +232,26 @@ class CameraRelocation:
             im1_file_name=self.img1.base_name,
             im2_file_name=self.img2.base_name,
             folder_name=self.output_folder)
+
+        #######################
+        # We should recover R,t here
+        #######################
+
+
+    def _plot_point_cloud(self):
+        Rt1 = np.hstack((np.eye(3), np.zeros((3, 1))))
+
+
+        # self.t = self.t/(self.t[0]/-40.0)
+        Rt2 = np.hstack([self.R, self.t])
+
+        # t = np.array([-40, 0, -15]).reshape(3, 1)
+        # Rt2 = np.hstack((np.eye(3), t))
+        # Rt2 = np.hstack((self.R, t))
+
+        depth_estimation.plot_point_cloud(self.img1.key_points, self.img2.key_points, self.matches_E, self.K_inv, Rt1, Rt2)
+
+
+
+
+

@@ -10,25 +10,10 @@ import numpy as np
 from linear_algebra_helper import cheirality_check
 
 
+import Rt_transform
 def R2yzx(R):
     assert R.shape == (3, 3)
-    """
-    http://www.cnblogs.com/singlex/p/RotateMatrix2Euler.html
-    :param R:
-    :return: thetaz, thetay, thetax
-    """
-    r11 = R[0][0]
-    r21 = R[1][0]
-    r31 = R[2][0]
-    r32 = R[2][1]
-    r33 = R[2][2]
-
-    from math import pi, atan2, sqrt
-    z = atan2(r21, r11) / pi * 180
-    y = atan2(-r31, sqrt(r32 * r32 + r33 * r33)) / pi * 180
-    x = atan2(r32, r33) / pi * 180
-
-    return np.array([z, y, x]).reshape(3, 1)    # to make it the same as t
+    return Rt_transform.GetEulerDegreeZYX(R)
 
 
 def Rs2zyxs(Rs):
@@ -172,6 +157,11 @@ def points_pixel_to_camera(pts1, pts2, K_inv):
         # normalize and homogenize the image coordinates
         pts1_cam.append(K_inv.dot([pts1[i][0], pts1[i][1], 1.0]))
         pts2_cam.append(K_inv.dot([pts2[i][0], pts2[i][1], 1.0]))
+
+    pts1_cam = np.array(pts1_cam)
+    pts2_cam = np.array(pts2_cam)
+
+    assert pts1_cam.shape[1] == 3 and pts2_cam.shape[1] == 3
 
     return pts1_cam, pts2_cam
 

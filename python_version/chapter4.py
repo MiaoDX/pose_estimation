@@ -31,6 +31,7 @@ def main():
 
 
 def test_camera_relocation():
+    import traceback
 
     K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935],
                   [0, 0, 1]])    # Canon5DMarkIII-EF50mm
@@ -46,10 +47,12 @@ def test_camera_relocation():
         "ORB", feature_detector_params=dict(nfeatures=2000))
     #cameraRelocation.set_matcher(True) # this already set with the set fd and de
 
+    """
     strs = [str(x) for x in range(1, 10)]
     strs.extend(['1a', '1b', '1c', '4a', '7a', '7b'])
-    #strs = sorted(strs)
-    strs = strs[:2]
+    strs = sorted(strs)
+    """
+    strs = ['1', '2']
 
     for i in range(len(strs) - 1):
         im1_file = base_dir + strs[i] + ".jpg"
@@ -64,6 +67,7 @@ def test_camera_relocation():
             except:
                 print("Somthing went wrong when calc {} and {}".format(
                     im1_file, im2_file))
+                traceback.print_exc()
                 continue
 
 
