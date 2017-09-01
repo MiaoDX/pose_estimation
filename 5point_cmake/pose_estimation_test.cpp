@@ -5,9 +5,10 @@
  */
 
 
-#include "pose_estimation_2d2d.h"
+#include "pose_estimation.h"
 #include "getRTAlgo.h"
 using namespace std;
+using namespace cv;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Main program
@@ -42,23 +43,15 @@ int main(int argc,char **argv){
   extractKeyPointsAndMatches ( featureName, imgname1, imgname2, kpts1, kpts2, matches);
   // extractKeyPointsAndMatches (featureName, imgname1, imgname2, kpts1, kpts2, matches, true);
 
+
+  calcuateRT_test ( kpts1, kpts2, matches, K );
+
   // - REFINE
   refineMatcheswithHomography ( kpts1, kpts2, matches );
-  // refineMatchesWithFundmentalMatrix ( kpts1, kpts2, matches );
-    
-  vector<Point2f> pts1, pts2;
-  kp2pts ( kpts1, kpts2, matches, pts1, pts2 );
+  calcuateRT_test ( kpts1, kpts2, matches, K );
 
-  // matchPointsRansac(pts1, pts2);
-  
-  //-- 估计两张图像间运动
-  Mat R, t;
-  calculateRT_CV3 ( pts1, pts2, K, R, t );
-  DEBUG_RT ( R, t );
-
-  Mat R_5, t_5;
-  calculateRT_5points ( pts1, pts2, K, R_5, t_5, pts1.size () );
-  DEBUG_RT ( R_5, t_5 );
+  refineMatchesWithFundmentalMatrix ( kpts1, kpts2, matches );
+  calcuateRT_test ( kpts1, kpts2, matches, K );
 
   system ( "pause" );
   return 0;
