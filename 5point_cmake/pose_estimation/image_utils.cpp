@@ -9,8 +9,7 @@ void resize_and_show ( const Mat& im, int target_height, string name )
     int height = im.rows;
     int width = im.cols;
 
-    if ( height == 0 || width == 0 )
-    {
+    if ( height == 0 || width == 0 ) {
         cout << "Seems that the input image is empty" << endl;
         return;
     }

@@ -28,8 +28,7 @@ void rotate_angle ( const Mat& R )
 
 void DEBUG_RT ( const Mat& R, const Mat& t )
 {
-    if(R.empty() )
-    {
+    if(R.empty() ) {
         cout << "Seems R is empty in DEBUG_RT, just return." << endl;
         return;
     }
@@ -44,9 +43,9 @@ void DEBUG_RT ( const Mat& R, const Mat& t )
 }
 
 void essentialFromFundamental ( const Mat &F,
-    const Mat &K1,
-    const Mat &K2,
-    Mat& E )
+                                const Mat &K1,
+                                const Mat &K2,
+                                Mat& E )
 {
     E = K2.t () * F * K1;
 }

@@ -21,8 +21,8 @@ int main()
     double K_arr[9] = { 8607.8639, 0, 2880.72115, 0, 8605.4303, 1913.87935, 0, 0, 1 };
 
 
-    Mat rvec = (cv::Mat_<double>(3, 1) << 0.1 , 0.2 , 0.3);
-    Mat tvec = (cv::Mat_<double>(3, 1) << 0.4 , 0.5 , 0.6);
+    Mat rvec = (cv::Mat_<double>(3, 1) << 0.1, 0.2, 0.3);
+    Mat tvec = (cv::Mat_<double>(3, 1) << 0.4, 0.5, 0.6);
     normalize(tvec, tvec);
     std::cout << "Expected rvec: " << rvec << std::endl;
     std::cout << "Expected tvec: " << tvec << std::endl;
@@ -31,15 +31,14 @@ int main()
     Mat rmat;
     Rodrigues(rvec, rmat);
 
-    
+
     srand ( static_cast<int>(time ( 0 )) );
     RNG rng( rand () );
     Mat Xs(N, 3, CV_64F);
     rng.fill(Xs, RNG::UNIFORM, -bound_2d, bound_2d);
 
     cout << "Print out the first five lines of random values:" << endl;
-    for(int i = 0; i < 5; i++ )
-    {
+    for(int i = 0; i < 5; i++ ) {
         cout << Xs.row (i) << endl;
     }
 
@@ -69,37 +68,37 @@ int main()
     cout << "F:" << endl << F << endl;
 
     Mat E_f_F = K.t() * F * K;
-    cout << "E from F:" << endl << E_f_F << endl;    
+    cout << "E from F:" << endl << E_f_F << endl;
     cout << "Scaled E from F:" << endl << scaled_E(E_f_F) << endl;
 
 
 #ifdef _CV_VERSION_3
-    // Mat E = findEssentialMat(x1s, x2s, focal, pp, CV_RANSAC, 0.99, 1, noArray() ); 
+    // Mat E = findEssentialMat(x1s, x2s, focal, pp, CV_RANSAC, 0.99, 1, noArray() );
     Mat E = findEssentialMat(x1s, x2s, K, CV_RANSAC, 0.99, 1, noArray());
 
     std::cout << "=====================================================" << std::endl;
     cout << "E from findEssentialMat:" << endl << E << endl;
     cout << "Scaled E:" << endl << scaled_E ( E ) << endl;
-    
 
-    
+
+
     // we can get four potential answers here
-    Mat R1_5pt, R2_5pt, tvec_5pt, rvec1_5pt, rvec2_5pt; 
-    decomposeEssentialMat(E, R1_5pt, R2_5pt, tvec_5pt); 
+    Mat R1_5pt, R2_5pt, tvec_5pt, rvec1_5pt, rvec2_5pt;
+    decomposeEssentialMat(E, R1_5pt, R2_5pt, tvec_5pt);
     cout << "============== decomposeEssentialMat =============" << endl;
     DEBUG_RT ( R1_5pt, tvec_5pt );
     DEBUG_RT ( R2_5pt, tvec_5pt );
     cout << "============== decomposeEssentialMat =============" << endl;
 
     /*
-    Rodrigues(R1_5pt, rvec1_5pt); 
-    Rodrigues(R2_5pt, rvec2_5pt); 
-    std::cout << "5-pt-nister rvec: " << std::endl; 
-    std::cout << rvec1_5pt << std::endl; 
-    std::cout << rvec2_5pt << std::endl; 
-    std::cout << "5-pt-nister tvec: " << std::endl; 
-    std::cout << tvec_5pt << std::endl; 
-    std::cout << -tvec_5pt << std::endl; 
+    Rodrigues(R1_5pt, rvec1_5pt);
+    Rodrigues(R2_5pt, rvec2_5pt);
+    std::cout << "5-pt-nister rvec: " << std::endl;
+    std::cout << rvec1_5pt << std::endl;
+    std::cout << rvec2_5pt << std::endl;
+    std::cout << "5-pt-nister tvec: " << std::endl;
+    std::cout << tvec_5pt << std::endl;
+    std::cout << -tvec_5pt << std::endl;
     */
 
     Mat R, t, r;
@@ -119,8 +118,7 @@ int main()
     //vector<Point2f> ptsa = Mat_<Point2f>(x1s);	// [Mat, vector<point2f>，Iplimage等等常见类型转换](http://blog.csdn.net/foreverhehe716/article/details/6749175)
     vector<Point2f> pts1;
     vector<Point2f> pts2;
-    for ( int i = 0; i < x1s.rows; i++ )
-    {
+    for ( int i = 0; i < x1s.rows; i++ ) {
         pts1.push_back ( Point2f ( x1s.row ( i ) ) );
         pts2.push_back ( Point2f ( x2s.row ( i ) ) );
     }
@@ -132,7 +130,7 @@ int main()
     /*
     std::cout << "=====================================================" << std::endl;
     std::cout << "Nghia Ho.'s algorithm again" << std::endl;
- 
+
 
     double rotate_x, rotate_y, rotate_z, move_x, move_y, move_z;
     calculateRT ( pts1, pts2, K_arr, rotate_x, rotate_y, rotate_z, move_x, move_y, move_z, N );

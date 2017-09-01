@@ -7,10 +7,10 @@ using namespace cv;
 
 
 void refineMatcheswithHomography ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2,
-    vector<DMatch>& matches, const double reprojectionThreshold = 3.0);
+                                   vector<DMatch>& matches, const double reprojectionThreshold = 3.0);
 
-void refineMatchesWithFundmentalMatrix ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, 
-    vector<DMatch>& matches );
+void refineMatchesWithFundmentalMatrix ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2,
+        vector<DMatch>& matches );
 
 
 void unique_keypoint(vector<KeyPoint> &points);

@@ -14,6 +14,6 @@ void DEBUG_RT ( const Mat& R, const Mat& t );
 
 // [Copy from SFM](https://github.com/opencv/opencv_contrib/blob/master/modules/sfm/src/fundamental.cpp)
 void essentialFromFundamental ( const Mat &F,
-    const Mat &K1,
-    const Mat &K2,
-    Mat& E );
+                                const Mat &K1,
+                                const Mat &K2,
+                                Mat& E );
