@@ -86,12 +86,9 @@ class CameraRelocation:
         self.R = np.ones((3,3))
         self.t = np.ones((3,1))
 
-
         # Ready to go
         self.set_feature_detector_descriptor_extractor(feature_name)
         # self.set_matcher(withFlann=False) # already in set_feature_detector_descriptor_extractor
-
-
 
 
     def forward(self, new_frame_name):
@@ -107,10 +104,15 @@ class CameraRelocation:
 
         self._get_keypoints_and_descripotrs()
         self._get_matches()
-        # self._find_fundamental_matrix()
-        self._find_essential_matrix()
-        self._find_camera_matrices_rt()
-        # self._refine_rt_with_ransac()
+        self._refine_with_fundamental_matrix()
+
+        if imutils.is_cv2():
+            # self._find_fundamental_matrix() # already refined
+            self._find_essential_matrix()
+            self._find_camera_matrices_rt()
+        else:
+            self._refine_rt_with_ransac()
+
         self._plot_point_cloud()
 
     def load_image_left(self, img_path):
@@ -216,6 +218,7 @@ class CameraRelocation:
             pe_utils.DEBUG_Rt(self.R, self.t, "R t from linear algebra")
 
     def _refine_rt_with_ransac(self, split_num=100, thres=0.7):
+
         from ransac_Rt import split_matches_and_remove_less_confidence, get_zyxs_ts, get_nice_and_constant_zyxs_ts_list, print_out
 
         Rs, ts, confidences = split_matches_and_remove_less_confidence(
@@ -233,25 +236,41 @@ class CameraRelocation:
             im2_file_name=self.img2.base_name,
             folder_name=self.output_folder)
 
-        #######################
-        # We should recover R,t here
-        #######################
+        ##############################
+        # We should recover R,t here #
+        ##############################
+        import ransac_Rt
+        import Rt_transform
+        mean_values = ransac_Rt.mean_zyxs_ts(zyxs_ts_refine_list)
+        self.R = Rt_transform.EulerZYXDegree2R(mean_values[:3].reshape(3,1))
+        self.t = mean_values[3:].reshape(3,1)
+
+        E_backward = pe_utils.find_E_from_R_t(self.R, self.t)
+
+        # import refine
+        # refine.correctMatches_with_E(self.E, self.K, self.img1.key_points, self.img2.key_points, self.matches)
+
+        # pe_utils.DEBUG_Rt(self.R, self.t, "R t before recoverPose with backward E")
+        # self.R, self.t, matches_rp_cv3, matches_rp_bad_cv3 = pe_utils.recoverPose_from_E_cv3(
+        #     E_backward, self.img1.key_points, self.img2.key_points,
+        #     self.matches, self.K)
+        # self.matches = matches_rp_cv3
+        # pe_utils.DEBUG_Rt(self.R, self.t, "R t after recoverPose with backward E")
+
 
 
     def _plot_point_cloud(self):
+
+        print("In _plot_point_cloud")
+
         Rt1 = np.hstack((np.eye(3), np.zeros((3, 1))))
 
-
-        # self.t = self.t/(self.t[0]/-40.0)
+        self.t = self.t/(self.t[0]/-40.0)
         Rt2 = np.hstack([self.R, self.t])
 
         # t = np.array([-40, 0, -15]).reshape(3, 1)
         # Rt2 = np.hstack((np.eye(3), t))
         # Rt2 = np.hstack((self.R, t))
 
-        depth_estimation.plot_point_cloud(self.img1.key_points, self.img2.key_points, self.matches_E, self.K_inv, Rt1, Rt2)
-
-
-
-
-
+        depth_estimation.plot_point_cloud(self.img1.key_points, self.img2.key_points, self.matches, self.K_inv, Rt1,
+                                          Rt2)

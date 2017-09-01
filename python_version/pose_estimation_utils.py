@@ -76,7 +76,7 @@ def find_F_and_matches(kps1, kps2, matches):
         else:
             matches_F_bad.append(matches[i])
 
-    print("In find_F_and_refineMatches, matches:{} -> {}".format(
+    print("In find_F_and_matches, matches:{} -> {}".format(
         len(matches), len(matches_F)))
 
     return F, matches_F, matches_F_bad
@@ -97,6 +97,10 @@ def find_E_and_matches_cv3(kp1, kp2, matches, K):
     assert len(kp1) >= len(matches) and len(kp2) >= len(matches)
 
     pts1, pts2, _ = key_points_to_matched_pixel_points(kp1, kp2, matches)
+
+    print("pts1.shape:{}".format(pts1.shape))
+    print("pts2.shape:{}".format(pts2.shape))
+
     """ findEssentialMat(points1, points2, cameraMatrix[, method[, prob[, threshold[, mask]]]]) -> retval, mask """
     #E, mask_E = cv2.findEssentialMat(pts1, pts2, cameraMatrix=K, method=cv2.RANSAC, prob=0.999, threshold=0.2)
     E, mask_E = cv2.findEssentialMat(pts1, pts2, cameraMatrix=K)
@@ -185,3 +189,27 @@ def recoverPose_from_E_cv2(E, kps1, kps2, matches, K):
     t = Rt2[:, -1]
 
     return R, t, matches, list()
+
+def find_E_from_R_t(R, t):
+    """
+    http://blog.csdn.net/chenyusiyuan/article/details/5963256
+    :param R:
+    :param t:
+    :return:
+    """
+    assert R.shape == (3, 3)
+    assert t.shape == (3, 1)
+
+    tx = t[0]
+    ty = t[1]
+    tz = t[2]
+
+    S = np.array([0, -tz, ty, tz, 0, -tx, -ty, tx, 0]).reshape(3, 3)
+    return R.dot(S)
+
+def find_F_from_E_and_K(E, K):
+    K_inv = np.linalg.inv(K)
+    return K_inv.T.dot(E).dot(K_inv)
+
+def find_E_from_F_and_K(F, K):
+    return K.T.dot(F).dot(K)
