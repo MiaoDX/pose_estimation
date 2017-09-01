@@ -54,11 +54,6 @@ int main()
     Mat Xs(N, 3, CV_64F);
     rng.fill(Xs, RNG::UNIFORM, -bound_2d, bound_2d);
 
-    Mat noises ( N, 3, CV_64F );
-    rng.fill ( noises, RNG::UNIFORM, -bound_2d/100, bound_2d/100 );
-
-    Xs += noises;
-
 
     cout << "Print out the first five lines of random values:" << endl;
     for(int i = 0; i < 5; i++ )
@@ -82,11 +77,22 @@ int main()
     x2s.row(1) /= x2s.row(2);
     x2s.row(2) /= x2s.row(2);
 
+    //- Add some noise ====================================================
+    Mat noises_1 ( 3, N, CV_64F ), noises_2 ( 3, N, CV_64F );
+    rng.fill ( noises_1, RNG::UNIFORM, -bound_2d / 1000, bound_2d / 1000 );
+    rng.fill ( noises_2, RNG::UNIFORM, -bound_2d / 1000, bound_2d / 1000 );
+    x1s += noises_1;
+    x2s += noises_2;
+    //- Add some noise ====================================================
+
     x1s = x1s.t();
     x2s = x2s.t();
 
     x1s = x1s.colRange(0, 2) * 1.0;
     x2s = x2s.colRange(0, 2) * 1.0;
+
+
+
 
     //vector<Point2f> ptsa = Mat_<Point2f>(x1s);	// [Mat, vector<point2f>，Iplimage等等常见类型转换](http://blog.csdn.net/foreverhehe716/article/details/6749175)
     vector<Point2f> pts1;
