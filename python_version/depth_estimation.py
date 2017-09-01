@@ -19,8 +19,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
 
-def plot_point_cloud(first_key_points, second_key_points, matches, K_inv, Rt1,
-                     Rt2):
+def get_and_plot_point_cloud(first_key_points, second_key_points, matches,
+                             K_inv, Rt1, Rt2):
     """Plots 3D point cloud
         This method generates and plots a 3D point cloud of the recovered
         3D scene.
@@ -72,3 +72,5 @@ def plot_point_cloud(first_key_points, second_key_points, matches, K_inv, Rt1,
 
     plt.title('3D point cloud: Use pan axes button below to inspect')
     plt.show()
+
+    return pts3D_Nx3

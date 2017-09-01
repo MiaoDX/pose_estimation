@@ -10,6 +10,7 @@ import numpy as np
 def correctMatches_with_E(E, K, kps1, kps2, matches):
     """
     I am not so sure how to use this function, since it changes the coordinately of the points :<
+    [ref](http://answers.opencv.org/question/341/python-correctmatches/?answer=402#post-id-402)
     :param E:
     :param K:
     :param kps1:

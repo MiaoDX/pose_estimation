@@ -114,6 +114,8 @@ class CameraRelocation:
 
         self._plot_point_cloud()
 
+        self._PNPSolver_img2_pts_and_3DPoints()
+
     def load_image_left(self, img_path):
         img_color, img_gray = self._load_image(img_path)
         self.img1 = Image(img_path, img_color, img_gray)
@@ -262,13 +264,31 @@ class CameraRelocation:
 
         Rt1 = np.hstack((np.eye(3), np.zeros((3, 1))))
 
-        self.t = self.t / (self.t[0] / -40.0)
+        # self.t = self.t / (self.t[0] / -40.0) # NOTE HERE
         Rt2 = np.hstack([self.R, self.t])
 
         # t = np.array([-40, 0, -15]).reshape(3, 1)
         # Rt2 = np.hstack((np.eye(3), t))
         # Rt2 = np.hstack((self.R, t))
 
-        depth_estimation.plot_point_cloud(self.img1.key_points,
-                                          self.img2.key_points, self.matches,
-                                          self.K_inv, Rt1, Rt2)
+        self.pts3D_Nx3 = depth_estimation.get_and_plot_point_cloud(
+            self.img1.key_points, self.img2.key_points, self.matches,
+            self.K_inv, Rt1, Rt2)
+
+    def _PNPSolver_img2_pts_and_3DPoints(self):
+
+        pts1, pts2, _ = pe_utils.key_points_to_matched_pixel_points(
+            self.img1.key_points, self.img2.key_points, self.matches)
+
+        print("pts3D_Nx3.shape:{}, pts1.shape:{}".format(
+            self.pts3D_Nx3.shape, pts1.shape))
+        assert len(self.pts3D_Nx3) == len(pts1)
+        """solvePnP(objectPoints, imagePoints, cameraMatrix, distCoeffs[, rvec[, tvec[, useExtrinsicGuess[, flags]]]]) -> retval, rvec, tvec"""
+        # imagePoints = np.ascontiguousarray(pts2[:, :2]).reshape((-1, 1, 2))
+        _, rvec, tvec = cv2.solvePnP(self.pts3D_Nx3, pts2, self.K, None)
+
+        print("rvec:\n{}".format(rvec))
+        print("tvec:\n{}".format(tvec))
+
+        R, _ = cv2.Rodrigues(rvec)
+        pe_utils.DEBUG_Rt(R, tvec, "R t in _PNPSolver_img2_pts_and_3DPoints")
