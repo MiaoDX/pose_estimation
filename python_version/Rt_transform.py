@@ -5,7 +5,6 @@ Rotation Matrix <-> Euler angle
 
 It is transferred from C++ to python, without any change
 """
-
 """
 https://github.com/orocos/orocos_kinematics_dynamics/blob/master/orocos_kdl/src/frames.cpp
 
@@ -78,6 +77,7 @@ void Rotation::GetRPY(double& roll,double& pitch,double& yaw) const
 
 import numpy as np
 
+
 def GetRPY(R):
     assert R.shape == (3, 3)
     epsilon = 1e-12
@@ -85,8 +85,8 @@ def GetRPY(R):
 
     from math import atan2, pi, sqrt
 
-    pitch = atan2(-data[6], sqrt(data[0]*data[0]+data[3]*data[3]))
-    if abs(pitch) > pi/2-epsilon:
+    pitch = atan2(-data[6], sqrt(data[0] * data[0] + data[3] * data[3]))
+    if abs(pitch) > pi / 2 - epsilon:
         yaw = atan2(-data[1], data[4])
         roll = 0.0
     else:
@@ -94,6 +94,7 @@ def GetRPY(R):
         yaw = atan2(data[3], data[0])
 
     return np.array((roll, pitch, yaw))
+
 
 def GetEulerRadZYX(R):
     """
@@ -110,15 +111,17 @@ def GetEulerRadZYX(R):
     Beta = pitch
     Gamma = roll
 
-    assert -pi<=Alfa<=pi
-    assert -pi<=Gamma<=pi
-    assert -pi/2<=Beta<=pi/2
+    assert -pi <= Alfa <= pi
+    assert -pi <= Gamma <= pi
+    assert -pi / 2 <= Beta <= pi / 2
 
     return np.array([Alfa, Beta, Gamma]).reshape(3, 1)
 
+
 def GetEulerDegreeZYX(R):
     from math import pi
-    return GetEulerRadZYX(R)/pi*180
+    return GetEulerRadZYX(R) / pi * 180
+
 
 def RPY2R(roll, pitch, yaw):
     from math import sin, cos
@@ -129,9 +132,11 @@ def RPY2R(roll, pitch, yaw):
     cc1 = cos(roll)
     sc1 = sin(roll)
 
-    R_arr = [ca1*cb1,ca1*sb1*sc1 - sa1*cc1,ca1*sb1*cc1 + sa1*sc1,
-                   sa1*cb1,sa1*sb1*sc1 + ca1*cc1,sa1*sb1*cc1 - ca1*sc1,
-                   -sb1,cb1*sc1,cb1*cc1]
+    R_arr = [
+        ca1 * cb1, ca1 * sb1 * sc1 - sa1 * cc1, ca1 * sb1 * cc1 + sa1 * sc1,
+        sa1 * cb1, sa1 * sb1 * sc1 + ca1 * cc1, sa1 * sb1 * cc1 - ca1 * sc1,
+        -sb1, cb1 * sc1, cb1 * cc1
+    ]
 
     return np.array(R_arr).reshape(3, 3)
 
@@ -139,12 +144,13 @@ def RPY2R(roll, pitch, yaw):
 def EulerZYXDegree2R(zyx_degree):
     from math import pi
 
-    zyx_rad = zyx_degree/180*pi
+    zyx_rad = zyx_degree / 180 * pi
 
     return EulerZYXRad2R(zyx_rad)
 
+
 def EulerZYXRad2R(zyx_rad):
-    assert zyx_rad.shape == (3,1)
+    assert zyx_rad.shape == (3, 1)
     from math import pi
     Alfa = zyx_rad[0]
     Beta = zyx_rad[1]
@@ -154,12 +160,15 @@ def EulerZYXRad2R(zyx_rad):
     assert -pi / 2 <= Beta <= pi / 2
     return RPY2R(Gamma, Beta, Alfa)
 
+
 if __name__ == "__main__":
 
-    R = np.array([0, 0, 1, 0, 1, 0, -1, 0, 0]).reshape(3,3)
+    R = np.array([0, 0, 1, 0, 1, 0, -1, 0, 0]).reshape(3, 3)
 
-
-    R = np.array([ 0.99943541,  0.00186892,  0.03354636, -0.00198323,  0.99999234,  0.00337439, -0.0335398,  -0.00343902,  0.99943147]).reshape(3,3)
+    R = np.array([
+        0.99943541, 0.00186892, 0.03354636, -0.00198323, 0.99999234, 0.00337439,
+        -0.0335398, -0.00343902, 0.99943147
+    ]).reshape(3, 3)
 
     zyx_rad = GetEulerRadZYX(R)
     print(zyx_rad.T)

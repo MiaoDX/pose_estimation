@@ -6,6 +6,7 @@ import cv2
 import pose_estimation_utils as pe_utils
 import numpy as np
 
+
 def correctMatches_with_E(E, K, kps1, kps2, matches):
     """
     I am not so sure how to use this function, since it changes the coordinately of the points :<
@@ -19,7 +20,8 @@ def correctMatches_with_E(E, K, kps1, kps2, matches):
     F_backward = pe_utils.find_F_from_E_and_K(E, K)
     """correctMatches(F, points1, points2[, newPoints1[, newPoints2]]) -> newPoints1, newPoints2"""
 
-    pts1, pts2, _ = pe_utils.key_points_to_matched_pixel_points(kps1, kps2, matches)
+    pts1, pts2, _ = pe_utils.key_points_to_matched_pixel_points(
+        kps1, kps2, matches)
 
     for i in range(10):
         print(pts1[i])
@@ -35,4 +37,6 @@ def correctMatches_with_E(E, K, kps1, kps2, matches):
     for i in range(10):
         print(newPts1[i])
 
-    print("In correctMatches: pts1.shape:{}->newPts1.shape:{}, newPts2.shape:{}".format(pts1.shape, newPts1.shape, newPts2.shape))
+    print(
+        "In correctMatches: pts1.shape:{}->newPts1.shape:{}, newPts2.shape:{}".
+        format(pts1.shape, newPts1.shape, newPts2.shape))

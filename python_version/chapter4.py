@@ -45,8 +45,6 @@ def test_camera_relocation():
         K, d, feature_name="ORB", output_folder="20170827")
     cameraRelocation.set_feature_detector_descriptor_extractor(
         "ORB", feature_detector_params=dict(nfeatures=2000))
-
-
     """
     strs = [str(x) for x in range(1, 10)]
     strs.extend(['1a', '1b', '1c', '4a', '7a', '7b'])

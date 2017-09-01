@@ -83,13 +83,12 @@ class CameraRelocation:
         self.img1 = Image()
         self.img2 = Image()
 
-        self.R = np.ones((3,3))
-        self.t = np.ones((3,1))
+        self.R = np.ones((3, 3))
+        self.t = np.ones((3, 1))
 
         # Ready to go
         self.set_feature_detector_descriptor_extractor(feature_name)
         # self.set_matcher(withFlann=False) # already in set_feature_detector_descriptor_extractor
-
 
     def forward(self, new_frame_name):
 
@@ -242,8 +241,8 @@ class CameraRelocation:
         import ransac_Rt
         import Rt_transform
         mean_values = ransac_Rt.mean_zyxs_ts(zyxs_ts_refine_list)
-        self.R = Rt_transform.EulerZYXDegree2R(mean_values[:3].reshape(3,1))
-        self.t = mean_values[3:].reshape(3,1)
+        self.R = Rt_transform.EulerZYXDegree2R(mean_values[:3].reshape(3, 1))
+        self.t = mean_values[3:].reshape(3, 1)
 
         E_backward = pe_utils.find_E_from_R_t(self.R, self.t)
 
@@ -257,20 +256,19 @@ class CameraRelocation:
         # self.matches = matches_rp_cv3
         # pe_utils.DEBUG_Rt(self.R, self.t, "R t after recoverPose with backward E")
 
-
-
     def _plot_point_cloud(self):
 
         print("In _plot_point_cloud")
 
         Rt1 = np.hstack((np.eye(3), np.zeros((3, 1))))
 
-        self.t = self.t/(self.t[0]/-40.0)
+        self.t = self.t / (self.t[0] / -40.0)
         Rt2 = np.hstack([self.R, self.t])
 
         # t = np.array([-40, 0, -15]).reshape(3, 1)
         # Rt2 = np.hstack((np.eye(3), t))
         # Rt2 = np.hstack((self.R, t))
 
-        depth_estimation.plot_point_cloud(self.img1.key_points, self.img2.key_points, self.matches, self.K_inv, Rt1,
-                                          Rt2)
+        depth_estimation.plot_point_cloud(self.img1.key_points,
+                                          self.img2.key_points, self.matches,
+                                          self.K_inv, Rt1, Rt2)

@@ -10,7 +10,6 @@ def get_n_pts_pairs(num, K):
     pass
     bound_2d = 5
 
-
     rvec = np.array([0.1, 0.2, 0.3]).reshape(3, 1)
     tvec = np.array([0.4, 0.5, 0.6]).reshape(3, 1)
 
@@ -23,10 +22,9 @@ def get_n_pts_pairs(num, K):
 
     np.random.seed(42)
 
-    Xs = np.random.random((num, 3))*bound_2d - bound_2d/2
+    Xs = np.random.random((num, 3)) * bound_2d - bound_2d / 2
     # print(Xs)
     # print(Xs.shape)
-
 
     #- camera to pixel
     x1s = K.dot(Xs.T)
@@ -68,8 +66,7 @@ def find_E_from_pts(pts1, pts2, K):
         else:
             index_E_bad.append(i)
 
-    print(
-        "In find_E_cv3, matches:{} -> {}".format(len(index_E), len(pts1)))
+    print("In find_E_cv3, matches:{} -> {}".format(len(index_E), len(pts1)))
 
     return E, index_E
 
@@ -114,17 +111,9 @@ if __name__ == "__main__":
 
     R, t = recoverPose_from_E_and_pts(E, pts1, pts2, K)
 
-
     import pose_estimation_utils as pe_utils
     pe_utils.find_E_from_R_t(R, t)
     print("E from R, t:\n{}".format(E))
-
-
-
-
-
-
-
 """
 When n is 5
 the calculated E shape (24, 3), this should be a bug, right?
