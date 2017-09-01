@@ -284,8 +284,10 @@ class CameraRelocation:
             self.pts3D_Nx3.shape, pts1.shape))
         assert len(self.pts3D_Nx3) == len(pts1)
         """solvePnP(objectPoints, imagePoints, cameraMatrix, distCoeffs[, rvec[, tvec[, useExtrinsicGuess[, flags]]]]) -> retval, rvec, tvec"""
-        # imagePoints = np.ascontiguousarray(pts2[:, :2]).reshape((-1, 1, 2))
         _, rvec, tvec = cv2.solvePnP(self.pts3D_Nx3, pts2, self.K, None)
+
+        # imagePoints = np.ascontiguousarray(pts2[:, :2]).reshape((-1, 1, 2)) # no need, [ref, note in solvePnP](http://www.docs.opencv.org/3.3.0/d9/d0c/group__calib3d.html)
+        # _, rvec, tvec = cv2.solvePnP(self.pts3D_Nx3, imagePoints, self.K, None)
 
         print("rvec:\n{}".format(rvec))
         print("tvec:\n{}".format(tvec))

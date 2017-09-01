@@ -137,6 +137,15 @@ def AgglomerativeClustering_linkage_average(X, cluster_num):
     >>> ag1 = AgglomerativeClustering_linkage_average(X, 2) #doctest: +ELLIPSIS
     >>> ag1[:5] == list(np.ones(5)*ag1[0])
     True
+    >>> ag1 = AgglomerativeClustering_linkage_average(X, 3) #doctest: +ELLIPSIS
+    >>> ag1[:5] == list(np.ones(5)*ag1[0])
+    True
+    >>> ag1 = AgglomerativeClustering_linkage_average(X, 4) #doctest: +ELLIPSIS
+    >>> ag1[:5] == list(np.ones(5)*ag1[0])
+    True
+    >>> ag1 = AgglomerativeClustering_linkage_average(X, 5) #doctest: +ELLIPSIS
+    >>> ag1[:5] == list(np.ones(5)*ag1[0])
+    True
     """
     from time import time
     from sklearn.cluster import AgglomerativeClustering
@@ -151,7 +160,55 @@ def AgglomerativeClustering_linkage_average(X, cluster_num):
     return list(clustering.labels_)
 
 
-def get_intersection_label_index(new_labels, last_chosen_index_list):
+def AgglomerativeClustering_linkage_average_with_xalglib(X, cluster_num):
+    """
+    [clst_linkage example](http://www.alglib.net/translator/man/manual.cpython.html)
+    :param X:
+    :param cluster_num:
+    :return:
+    >>> a1 = [0, 0, 0, 0, 0, 0]
+    >>> a2 = [0, 0, 0, 0, 1, 0]
+    >>> a3 = [0, 0, 0, 0, 0, 1]
+    >>> a4 = [0, 0, 0, 0, -1, 0]
+    >>> a5 = [0, 0, 0, 0, 0, -1]  # above are alike
+
+    >>> a6 = [0, 0, 0, 0, 10, 0]
+    >>> a7 = [0, 0, 0, 0, 0, 10]
+    >>> a8 = [0, 0, 0, 0, -10, 0]
+    >>> a9 = [0, 0, 0, 0, 0, -10]
+
+    >>> X = [a1, a2, a3, a4, a5, a5, a6, a7, a8, a9]
+    >>> ag1 = AgglomerativeClustering_linkage_average_with_xalglib(X, 2) #doctest: +ELLIPSIS
+    >>> ag1[:5] == list(np.ones(5)*ag1[0])
+    True
+    >>> ag1 = AgglomerativeClustering_linkage_average_with_xalglib(X, 3) #doctest: +ELLIPSIS
+    >>> ag1[:5] == list(np.ones(5)*ag1[0])
+    True
+    >>> ag1 = AgglomerativeClustering_linkage_average_with_xalglib(X, 4) #doctest: +ELLIPSIS
+    >>> ag1[:5] == list(np.ones(5)*ag1[0])
+    True
+    >>> ag1 = AgglomerativeClustering_linkage_average_with_xalglib(X, 5) #doctest: +ELLIPSIS
+    >>> ag1[:5] == list(np.ones(5)*ag1[0])
+    True
+    """
+    from time import time
+    import xalglib
+
+    t0 = time()
+    s = xalglib.clusterizercreate()
+    xalglib.clusterizersetpoints(s, X, 2) # NORM_L2
+    xalglib.clusterizersetahcalgo(s, 2) # unweighted average linkage
+    rep = xalglib.clusterizerrunahc(s)
+    cidx, cz = xalglib.clusterizergetkclusters(rep, cluster_num)
+    # print(cidx)
+
+
+    print("Using linkage {}, time cost {}".format('average', time() - t0))
+
+    return list(cidx)
+
+
+def get_intersection_sample_index(new_labels, last_chosen_index_list):
     from scipy.stats import mode
     lable_mode = mode(new_labels).mode
     mode_indexes = np.where(new_labels == lable_mode)
@@ -167,7 +224,7 @@ def get_nice_and_constant_zyxs_ts_list(zyxs_ts, accept_mode_ration=0.6):
     last_chosen_index_list = list(range(all_len))
     for i in range(2, 6):
         new_labels = AgglomerativeClustering_linkage_average(zyxs_ts, i)
-        chosen_index_list = get_intersection_label_index(
+        chosen_index_list = get_intersection_sample_index(
             new_labels, last_chosen_index_list)
 
         if len(chosen_index_list) / all_len < accept_mode_ration:
@@ -320,11 +377,10 @@ def run():
 
 if __name__ == "__main__":
 
-    DOCTEST_DEPRESS_PRINT = False
-
     import doctest
-    if DOCTEST_DEPRESS_PRINT:
-        print = lambda *args, **kwargs: None    # we are doing this to suppress the output, so we can do it easy for testing doc
+    old_print = print # the print is not necessary in doctest
+    print = lambda *args, **kwargs: None    # we are doing this to suppress the output, so we can do it easy for testing doc
     doctest.testmod(verbose=True)
 
+    print = old_print
     run()
