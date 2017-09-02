@@ -176,9 +176,6 @@ if __name__ == "__main__":
     zyx_degree = GetEulerDegreeZYX(R)
     print(zyx_degree.T)
 
-    zyx2 = R2yzx(R)
-    print(zyx2.T)
-
     R2 = EulerZYXRad2R(zyx_rad)
     print(R2)
 
