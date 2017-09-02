@@ -23,7 +23,7 @@ int main ( int argc, char **argv )
 
     double max_value = *max_element ( std::begin ( v ), std::end ( v ) );
 
-    
+
 
     cout << max_value << endl;
 

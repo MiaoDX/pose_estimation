@@ -20,7 +20,7 @@ void getFeatureDetectorDescriptorExtractor ( Ptr<FeatureDetector>& fd, Ptr<Descr
         de = xfeatures2d::BriefDescriptorExtractor::create ();
     }
     else if ( featurename == "ORB" ) {
-        fd = de = ORB::create ( 2000 ); // the default nfeatures of 500 is too small, 50000 seems nice
+        fd = de = ORB::create ( 1000 ); // the default nfeatures of 500 is too small, 50000 seems nice
     }
 
 

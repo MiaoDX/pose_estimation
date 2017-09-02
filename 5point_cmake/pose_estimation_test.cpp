@@ -44,7 +44,11 @@ int main(int argc,char **argv)
     // extractKeyPointsAndMatches (featureName, imgname1, imgname2, kpts1, kpts2, matches, true);
 
 
-    calcuateRT_test ( kpts1, kpts2, matches, K );
+    //calcuateRT_test ( kpts1, kpts2, matches, K );
+
+    //calculateRT_CV3_RANSAC ( kpts1, kpts2, matches, K );
+
+    calculateRT_5points_RANSAC ( kpts1, kpts2, matches, K );
 
     // - REFINE
     refineMatcheswithHomography ( kpts1, kpts2, matches );

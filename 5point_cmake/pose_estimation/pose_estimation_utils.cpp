@@ -11,7 +11,7 @@ Mat scaled_E ( const Mat& E )
     return scaled_E;
 }
 
-void rotate_angle ( const Mat& R )
+vector<double> rotate_angle ( const Mat& R )
 {
     double r11 = R.at<double> ( 0, 0 ), r21 = R.at<double> ( 1, 0 ), r31 = R.at<double> ( 2, 0 ), r32 = R.at<double> ( 2, 1 ), r33 = R.at<double> ( 2, 2 );
 
@@ -24,6 +24,9 @@ void rotate_angle ( const Mat& R )
     double thetax = atan2 ( r32, r33 ) / PI * 180;
 
     cout << "thetaz:" << thetaz << " thetay:" << thetay << " thetax:" << thetax << endl;
+
+    vector<double> zyx{ thetaz, thetay, thetax };
+    return zyx;
 }
 
 void DEBUG_RT ( const Mat& R, const Mat& t )
@@ -40,6 +43,27 @@ void DEBUG_RT ( const Mat& R, const Mat& t )
     //cout << "r=" << endl << r << endl;
     rotate_angle ( R );
     cout << "t:" << t.t() << endl;
+}
+
+vector<double> get_zyx_t_from_R_t ( const Mat&R, const Mat&t )
+{
+
+    assert ( R.size () == Size ( 3, 3 ) );
+    assert ( t.size () == Size ( 1, 3 ) );
+
+    vector<double> zyx_t_vec(6, 0);
+
+    vector<double> zyx_vec = rotate_angle ( R );
+
+    zyx_t_vec[0] = zyx_vec[0];
+    zyx_t_vec[1] = zyx_vec[1];
+    zyx_t_vec[2] = zyx_vec[2];
+
+    zyx_t_vec[3] = t.at<double> ( 0 );
+    zyx_t_vec[4] = t.at<double> ( 1 );
+    zyx_t_vec[5] = t.at<double> ( 2 );
+
+    return zyx_t_vec;
 }
 
 void essentialFromFundamental ( const Mat &F,
