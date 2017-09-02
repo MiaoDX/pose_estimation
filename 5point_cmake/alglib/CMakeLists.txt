@@ -8,7 +8,7 @@ set(ALGLIB_DIR ${CMAKE_SOURCE_DIR}/src)
 
 include_directories( ${ALGLIB_DIR} ${CMAKE_SOURCE_DIR} )
 
-AUX_SOURCE_DIRECTORY( ${ALGLIB_DIR} ALGLIB_FILES) # or below
+AUX_SOURCE_DIRECTORY( ${ALGLIB_DIR} ALGLIB_FILES)
 
 add_executable(example_clst_kclusters example_clst_kclusters.cpp ${ALGLIB_FILES})
 
