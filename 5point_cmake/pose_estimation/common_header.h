@@ -1,5 +1,4 @@
-#ifndef _POSE_ESTIMATION_H
-#define _POSE_ESTIMATION_H
+#pragma once
 
 
 #include <iostream>
@@ -22,12 +21,4 @@
 #include <opencv2/nonfree/gpu.hpp>
 #endif
 
-#include "keypoints_descriptors_utils.h"
-#include "pose_estimation_utils.h"
-#include "refine_matches.h"
-#include "image_utils.h"
 
-// using namespace cv;
-// using namespace std;
-
-#endif
