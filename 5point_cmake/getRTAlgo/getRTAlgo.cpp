@@ -1,6 +1,6 @@
 #include "getRTAlgo.h"
 #include "5point.h"
-#include <refine_with_clst_kclusters.h>
+#include "refine_with_clst_kclusters.h"
 
 
 using namespace cv;
@@ -128,19 +128,14 @@ bool _calculateRT_5points_with_ratio_many_results( const vector<Point2f>& vpts1,
 
 bool _calculateRT_5points_with_ratio ( const vector<Point2f>& vpts1, const vector<Point2f>& vpts2, const Mat& K, Mat& R, Mat& t, double& inliers_ratio, int ptsLimit, bool withDebug )
 {
-
     vector<Mat> R_vec, t_vec;
     vector<double> inliers_ratio_vec;
     bool ret = _calculateRT_5points_with_ratio_many_results ( vpts1, vpts2, K, R_vec, t_vec, inliers_ratio_vec, vpts1.size (), true );
-
-
 
     if ( ret == false) {
         cout << "Could not find a valid essential matrix" << endl;
         return false;
     }
-
-
 
     auto max_value = std::max_element ( inliers_ratio_vec.begin (), inliers_ratio_vec.end () );
     int best_index = std::distance ( inliers_ratio_vec.begin (), max_value );
@@ -148,11 +143,6 @@ bool _calculateRT_5points_with_ratio ( const vector<Point2f>& vpts1, const vecto
 
     R = R_vec[best_index];
     t = t_vec[best_index];
-
-    if ( withDebug ) {
-        cout << "============== Solve5PointEssential =============" << endl;
-    }
-
 
     return true;
 }
@@ -208,25 +198,7 @@ void _calculateRT_CV3_with_ratio(
     //-- 计算本质矩阵
     Mat E = findEssentialMat(points1, points2, K);
 
-    /*
-    if (withDebug) {
-        cout << "E from findEssentialMat:" << endl << E << endl;
-        Mat E_scaled = scaled_E ( E );
-        cout << "Scaled E:" << endl << E_scaled << endl;
-
-        // we can get four potential answers here
-        Mat R1_5pt, R2_5pt, tvec_5pt, rvec1_5pt, rvec2_5pt;
-        decomposeEssentialMat ( E, R1_5pt, R2_5pt, tvec_5pt );
-        cout << "============== decomposeEssentialMat =============" << endl;
-        DEBUG_RT ( R1_5pt, tvec_5pt );
-        DEBUG_RT ( R2_5pt, tvec_5pt );
-        cout << "============== decomposeEssentialMat =============" << endl;
-    }
-    */
-
-    //vector<uchar> inliersMask ( points1.size () ); // we can not set as this, since it seems that the Mask is changed shape in the method
     Mat inliersMask;
-
     //-- 从本质矩阵中恢复旋转和平移信息.re
     recoverPose(E, points1, points2, K, R, t, inliersMask);
     // cout << "inliersMask, channels:" << inliersMask.channels () << ", type:" << inliersMask.type () << ", size:" << inliersMask.size() << endl;
@@ -239,9 +211,7 @@ void _calculateRT_CV3_with_ratio(
     }
 
 
-    if (withDebug) {
-        cout << "In recoverPose, points:" << points1.size() << "->" << inliers_pts1.size() << endl;
-    }
+    cout << "In recoverPose, points:" << points1.size() << "->" << inliers_pts1.size() << endl;
 
     inliers_ratio = static_cast<double>(inliers_pts1.size()) / points1.size();
 #endif
@@ -312,7 +282,7 @@ vector<vector<double>> split_matches_and_remove_less_confidence(
 }
 
 
-void calculateRT_CV3_RANSAC( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K )
+void calculateRT_CV3_RANSAC( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K, Mat& R, Mat& t )
 {
     vector<vector<double>> zyx_t_vec = split_matches_and_remove_less_confidence(kps1, kps2, matches, K);
 
@@ -323,6 +293,11 @@ void calculateRT_CV3_RANSAC( const vector<KeyPoint> kps1, const vector<KeyPoint>
         cout << e << " ";
     }
     cout << endl;
+
+    R = EulerDegreeZYX2R ( mean_zyx_t[0], mean_zyx_t[1], mean_zyx_t[2] );
+    t = (Mat_<double> ( 3, 1 ) << mean_zyx_t[3], mean_zyx_t[4], mean_zyx_t[5]);
+    DEBUG_RT ( R, t );
+
 }
 
 
@@ -340,12 +315,15 @@ vector<vector<double>> split_matches_and_remove_less_confidence_5_points(
 
         vector<Mat> R_vec, t_vec;
         vector<double> inliers_ratio_vec;
-        _calculateRT_5points_with_ratio_many_results(points1, points2, K, R_vec, t_vec, inliers_ratio_vec, kps1.size(), true);
+        bool ret = _calculateRT_5points_with_ratio_many_results(points1, points2, K, R_vec, t_vec, inliers_ratio_vec, kps1.size(), true);
 
-        for (int i = 0; i < inliers_ratio_vec.size(); i ++) {
-            if (inliers_ratio_vec[i] > conf_thresh) {
-                vector<double> zyx_t = get_zyx_t_from_R_t(R_vec[i], t_vec[i]);
-                zyx_t_vec.push_back(zyx_t);
+        if (ret == false) {
+            continue;
+        }
+        for ( int i = 0; i < inliers_ratio_vec.size (); i++ ) {
+            if ( inliers_ratio_vec[i] > conf_thresh ) {
+                vector<double> zyx_t = get_zyx_t_from_R_t ( R_vec[i], t_vec[i] );
+                zyx_t_vec.push_back ( zyx_t );
             }
         }
     }
@@ -354,7 +332,7 @@ vector<vector<double>> split_matches_and_remove_less_confidence_5_points(
 }
 
 
-void calculateRT_5points_RANSAC( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K )
+void calculateRT_5points_RANSAC( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K, Mat& R, Mat& t )
 {
     vector<vector<double>> zyx_t_vec = split_matches_and_remove_less_confidence_5_points(kps1, kps2, matches, K);
 
@@ -365,6 +343,10 @@ void calculateRT_5points_RANSAC( const vector<KeyPoint> kps1, const vector<KeyPo
         cout << e << " ";
     }
     cout << endl;
+
+    R = EulerDegreeZYX2R ( mean_zyx_t[0], mean_zyx_t[1], mean_zyx_t[2] );
+    t = (Mat_<double> ( 3, 1 ) << mean_zyx_t[3], mean_zyx_t[4], mean_zyx_t[5]);
+    DEBUG_RT ( R, t );
 }
 
 void calcuateRT_test( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K )
@@ -379,4 +361,15 @@ void calcuateRT_test( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, 
     Mat R_5, t_5;
     calculateRT_5points(points1, points2, K, R_5, t_5, points1.size());
     DEBUG_RT(R_5, t_5);
+}
+
+void calcuateRT_Ransac_test ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K )
+{
+    Mat R, t;
+
+    calculateRT_CV3_RANSAC ( kps1, kps2, matches, K, R, t );
+    DEBUG_RT ( R, t );
+
+    calculateRT_5points_RANSAC ( kps1, kps2, matches, K, R, t );
+    DEBUG_RT ( R, t );
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pose_estimation.h"
+#include "common_header.h"
 
 using namespace std;
 using namespace cv;

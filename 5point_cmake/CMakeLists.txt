@@ -21,7 +21,7 @@ include_directories( ${FIVE_POINT_DIR} ${GET_RT_ALGO} ${POSE_ESTIMATION} ${ALGLI
 file(GLOB FIVE_POINT_CPP_FILES ${FIVE_POINT_DIR}/5point.cpp ${FIVE_POINT_DIR}/Rpoly.cpp)
 file(GLOB getRTAlgo_FILE ${GET_RT_ALGO}/getRTAlgo.cpp)
 # AUX_SOURCE_DIRECTORY( ${POSE_ESTIMATION} POSE_ESTIMATION_FILES) # or below
-file(GLOB POSE_ESTIMATION_FILES ${POSE_ESTIMATION}/keypoints_descriptors_utils.cpp ${POSE_ESTIMATION}/refine_matches.cpp ${POSE_ESTIMATION}/pose_estimation_utils.cpp ${POSE_ESTIMATION}/image_utils.cpp)
+file(GLOB POSE_ESTIMATION_FILES ${POSE_ESTIMATION}/keypoints_descriptors_utils.cpp ${POSE_ESTIMATION}/refine_matches.cpp ${POSE_ESTIMATION}/pose_estimation_utils.cpp ${POSE_ESTIMATION}/image_utils.cpp ${POSE_ESTIMATION}/Rt_transform.cpp)
 AUX_SOURCE_DIRECTORY( ${ALGLIB_SRC_DIR} ALGLIB_FILES)
 file(GLOB ALGLIB_DIR_FILES ${ALGLIB_DIR}/refine_with_clst_kclusters.cpp)
 
@@ -37,3 +37,7 @@ target_link_libraries(five_point_main ${OpenCV_LIBS})
 
 add_executable(pose_estimation_test pose_estimation_test.cpp ${ALL_NECESSARY_FILES})
 target_link_libraries(pose_estimation_test ${OpenCV_LIBS})
+
+
+add_executable(Rt_transform_test ${POSE_ESTIMATION}/Rt_transform_test.cpp ${POSE_ESTIMATION}/Rt_transform.cpp)
+target_link_libraries(Rt_transform_test ${OpenCV_LIBS})

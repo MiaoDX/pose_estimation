@@ -1,4 +1,4 @@
-#include "pose_estimation.h"
+#include "pose_estimation_header.h"
 
 using namespace std;
 using namespace cv;
@@ -32,8 +32,10 @@ void calculateRT_CV3 (
     Mat& R, Mat& t,
     bool withDebug = true );
 
-void calculateRT_CV3_RANSAC ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K );
+void calculateRT_CV3_RANSAC ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K, Mat& R, Mat& t );
 
-void calculateRT_5points_RANSAC ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K );
+void calculateRT_5points_RANSAC ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K, Mat& R, Mat& t );
 
 void calcuateRT_test ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K);
+
+void calcuateRT_Ransac_test ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K );

@@ -25,9 +25,9 @@ print(R3)
 
 int main()
 {
-    
+
     Mat Rotation = (Mat_<double> ( 3, 3 ) << 0.99943541, 0.00186892, 0.03354636, -0.00198323, 0.99999234, 0.00337439,
-        -0.0335398, -0.00343902, 0.99943147);
+                    -0.0335398, -0.00343902, 0.99943147);
 
 
     vector<double> zyx_rad = GetEulerRadZYX ( Rotation );
@@ -42,7 +42,7 @@ int main()
 
     Mat R3 = EulerDegreeZYX2R ( zyx_degree[0], zyx_degree[1], zyx_degree[2] );
     cout << "R3:\n" << R3 << endl;
-    
+
     system ( "pause" );
 
 }

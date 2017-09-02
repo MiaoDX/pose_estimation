@@ -5,7 +5,7 @@
  */
 
 
-#include "pose_estimation.h"
+#include "pose_estimation_header.h"
 #include "getRTAlgo.h"
 using namespace std;
 using namespace cv;
@@ -45,17 +45,17 @@ int main(int argc,char **argv)
 
 
     //calcuateRT_test ( kpts1, kpts2, matches, K );
+    calcuateRT_Ransac_test ( kpts1, kpts2, matches, K );
 
-    //calculateRT_CV3_RANSAC ( kpts1, kpts2, matches, K );
-
-    calculateRT_5points_RANSAC ( kpts1, kpts2, matches, K );
 
     // - REFINE
     refineMatcheswithHomography ( kpts1, kpts2, matches );
-    calcuateRT_test ( kpts1, kpts2, matches, K );
+    // calcuateRT_test ( kpts1, kpts2, matches, K );
+    calcuateRT_Ransac_test ( kpts1, kpts2, matches, K );
 
     refineMatchesWithFundmentalMatrix ( kpts1, kpts2, matches );
-    calcuateRT_test ( kpts1, kpts2, matches, K );
+    // calcuateRT_test ( kpts1, kpts2, matches, K );
+    calcuateRT_Ransac_test ( kpts1, kpts2, matches, K );
 
     system ( "pause" );
     return 0;

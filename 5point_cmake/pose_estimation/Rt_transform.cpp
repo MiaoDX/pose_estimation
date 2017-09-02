@@ -1,6 +1,6 @@
 /*
  * R,t and Euler angle transform
- * 
+ *
  * https://github.com/orocos/orocos_kinematics_dynamics/blob/master/orocos_kdl/src/frames.cpp
  */
 
@@ -17,13 +17,16 @@ using namespace cv;
 Mat RPY(double roll,double pitch,double yaw)
 {
     double ca1,cb1,cc1,sa1,sb1,sc1;
-    ca1 = cos(yaw); sa1 = sin(yaw);
-    cb1 = cos(pitch);sb1 = sin(pitch);
-    cc1 = cos(roll);sc1 = sin(roll);
-    
+    ca1 = cos(yaw);
+    sa1 = sin(yaw);
+    cb1 = cos(pitch);
+    sb1 = sin(pitch);
+    cc1 = cos(roll);
+    sc1 = sin(roll);
+
     Mat Rotation = (Mat_<double> ( 3, 3 ) << ca1*cb1,ca1*sb1*sc1 - sa1*cc1,ca1*sb1*cc1 + sa1*sc1,
-               sa1*cb1,sa1*sb1*sc1 + ca1*cc1,sa1*sb1*cc1 - ca1*sc1,
-               -sb1,cb1*sc1,cb1*cc1);
+                    sa1*cb1,sa1*sb1*sc1 + ca1*cc1,sa1*sb1*cc1 - ca1*sc1,
+                    -sb1,cb1*sc1,cb1*cc1);
 
     return Rotation;
 }
@@ -46,7 +49,7 @@ vector<double> GetRPY ( const Mat R )
 
     double epsilon = 1E-12;
     pitch = atan2 ( -data6, sqrt ( detail::sqr ( data0 ) + detail::sqr ( data3 ) ) );
-    
+
     if ( fabs ( pitch ) > (M_PI / 2.0 - epsilon) ) {
         yaw = atan2 ( -data1, data4 );
         roll = 0.0;
@@ -75,12 +78,14 @@ vector<double> GetRPY ( const Mat R )
 *  	- EulerZYX(alpha,beta,gamma) == EulerZYX(alpha +/- PI, PI-beta, gamma +/- PI)
 *  	- (angle + 2*k*PI)
 **/
-Mat EulerRadZYX2R ( double Alfa, double Beta, double Gamma ) {
+Mat EulerRadZYX2R ( double Alfa, double Beta, double Gamma )
+{
     return RPY ( Gamma, Beta, Alfa );
 }
 
 
-Mat EulerDegreeZYX2R ( double Alfa, double Beta, double Gamma ) {
+Mat EulerDegreeZYX2R ( double Alfa, double Beta, double Gamma )
+{
     Alfa = Alfa / 180 * M_PI;
     Beta = Beta / 180 * M_PI;
     Gamma = Gamma / 180 * M_PI;
@@ -107,14 +112,16 @@ Mat EulerDegreeZYX2R ( double Alfa, double Beta, double Gamma ) {
 *
 *  Closely related to RPY-convention.
 **/
-vector<double> GetEulerRadZYX ( const Mat& R){
+vector<double> GetEulerRadZYX ( const Mat& R)
+{
     //GetRPY ( Gamma, Beta, Alfa );
     vector<double> RPY = GetRPY ( R );
     double Gamma = RPY[0], Beta = RPY[1], Alfa = RPY[2];
-    return vector<double>{Alfa, Beta, Gamma};
+    return vector<double> {Alfa, Beta, Gamma};
 }
 
-vector<double> GetEulerDegreeZYX ( const Mat& R ) {
+vector<double> GetEulerDegreeZYX ( const Mat& R )
+{
     vector<double> zyx_rad = GetEulerRadZYX ( R );
-    return vector<double>{zyx_rad[0]/M_PI*180, zyx_rad[1] / M_PI * 180, zyx_rad[2] / M_PI * 180, };
+    return vector<double> {zyx_rad[0]/M_PI*180, zyx_rad[1] / M_PI * 180, zyx_rad[2] / M_PI * 180, };
 }
