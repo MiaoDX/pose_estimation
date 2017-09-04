@@ -159,6 +159,29 @@ def get_keypoints_and_descripotrs(feature_detector, descriptor_extractor, img):
     return keypoints, descriptors
 
 
+def get_keypoints(feature_detector, img):
+    # we use detect and compute separately since the detector and extractor can be different
+    assert feature_detector is not None
+    assert img is not None
+
+    kps = feature_detector.detect(img)
+    print("In get_keypoints, keypoints num after detect:{}".format(len(kps)))
+    return kps
+
+
+def get_keypoints_and_descripotrs_with_known_keypoints(descriptor_extractor,
+                                                       kps, img):
+    # we use detect and compute separately since the detector and extractor can be different
+    assert descriptor_extractor is not None
+    assert img is not None
+
+    keypoints, descriptors = descriptor_extractor.compute(img, kps)
+    print(
+        "In get_descripotrs_with_known_keypoints, input keypoints num :{}, after compute:{}, des num:{}".
+        format(len(kps), len(keypoints), len(descriptors)))
+    return keypoints, descriptors
+
+
 def match_with_type(matcher, des1, des2, normType=cv2.NORM_L2):
     assert isinstance(matcher, cv2.FlannBasedMatcher().__class__) or isinstance(
         matcher, cv2.BFMatcher().__class__)

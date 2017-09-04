@@ -42,7 +42,7 @@ def test_camera_relocation():
     # cameraRelocation = CameraRelocation(K, d, feature_name="BRIEF")
 
     cameraRelocation = CameraRelocation(
-        K, d, feature_name="ORB", output_folder="20170827")
+        K, d, feature_name="ORB", output_folder="20170904")
     cameraRelocation.set_feature_detector_descriptor_extractor(
         "ORB", feature_detector_params=dict(nfeatures=2000))
     """
@@ -50,23 +50,25 @@ def test_camera_relocation():
     strs.extend(['1a', '1b', '1c', '4a', '7a', '7b'])
     strs = sorted(strs)
     """
-    strs = ['1', '4']
+    strs = ['1', '4', '2', '3', '4', '5', '6', '7', '8', '9']
 
-    for i in range(len(strs) - 1):
-        im1_file = base_dir + strs[i] + ".jpg"
-        print("Using {} as the reference image".format(im1_file))
+    # for i in range(len(strs) - 1):
 
-        cameraRelocation.load_image_left(im1_file)
-        for j in range(i + 1, len(strs)):
-            im2_file = base_dir + strs[j] + ".jpg"
-            print("Using {} as the testing image".format(im2_file))
-            try:
-                cameraRelocation.forward(im2_file)
-            except:
-                print("Somthing went wrong when calc {} and {}".format(
-                    im1_file, im2_file))
-                traceback.print_exc()
-                continue
+    i = 0
+    im1_file = base_dir + strs[i] + ".jpg"
+    print("Using {} as the reference image".format(im1_file))
+
+    cameraRelocation.load_image_left(im1_file)
+    for j in range(i + 1, len(strs)):
+        im2_file = base_dir + strs[j] + ".jpg"
+        print("Using {} as the testing image".format(im2_file))
+        try:
+            cameraRelocation.forward(im2_file)
+        except:
+            print("Somthing went wrong when calc {} and {}".format(
+                im1_file, im2_file))
+            traceback.print_exc()
+            continue
 
 
 if __name__ == '__main__':

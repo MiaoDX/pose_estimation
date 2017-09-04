@@ -196,12 +196,11 @@ def AgglomerativeClustering_linkage_average_with_xalglib(X, cluster_num):
 
     t0 = time()
     s = xalglib.clusterizercreate()
-    xalglib.clusterizersetpoints(s, X, 2) # NORM_L2
-    xalglib.clusterizersetahcalgo(s, 2) # unweighted average linkage
+    xalglib.clusterizersetpoints(s, X, 2)    # NORM_L2
+    xalglib.clusterizersetahcalgo(s, 2)    # unweighted average linkage
     rep = xalglib.clusterizerrunahc(s)
     cidx, cz = xalglib.clusterizergetkclusters(rep, cluster_num)
     # print(cidx)
-
 
     print("Using linkage {}, time cost {}".format('average', time() - t0))
 
@@ -378,7 +377,7 @@ def run():
 if __name__ == "__main__":
 
     import doctest
-    old_print = print # the print is not necessary in doctest
+    old_print = print    # the print is not necessary in doctest
     print = lambda *args, **kwargs: None    # we are doing this to suppress the output, so we can do it easy for testing doc
     doctest.testmod(verbose=True)
 

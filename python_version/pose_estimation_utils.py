@@ -56,6 +56,21 @@ def key_points_to_matched_pixel_points(first_key_points, second_key_points,
     return first_match_points, second_match_points, distances
 
 
+def get_matched_key_points(first_key_points, second_key_points, matches):
+    assert first_key_points is not None and second_key_points is not None and matches is not None
+    assert len(first_key_points) >= len(matches) and len(
+        second_key_points) >= len(matches)
+
+    matched_kps1 = []
+    matched_kps2 = []
+
+    for i in range(len(matches)):
+        matched_kps1.append(first_key_points[matches[i].queryIdx])
+        matched_kps2.append(second_key_points[matches[i].trainIdx])
+
+    return matched_kps1, matched_kps2
+
+
 def find_F_and_matches(kps1, kps2, matches):
     assert kps1 is not None and kps2 is not None and matches is not None
     assert len(kps1) >= len(matches) and len(kps2) >= len(matches)

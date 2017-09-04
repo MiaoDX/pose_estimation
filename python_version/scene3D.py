@@ -86,6 +86,8 @@ class CameraRelocation:
         self.R = np.ones((3, 3))
         self.t = np.ones((3, 1))
 
+        self.FIND_3D_POINTS = False
+
         # Ready to go
         self.set_feature_detector_descriptor_extractor(feature_name)
         # self.set_matcher(withFlann=False) # already in set_feature_detector_descriptor_extractor
@@ -112,9 +114,13 @@ class CameraRelocation:
         else:
             self._refine_rt_with_ransac()
 
-        self._plot_point_cloud()
-
-        self._PNPSolver_img2_pts_and_3DPoints()
+        if not self.FIND_3D_POINTS:    # we have not estimated the 3d points
+            self._plot_point_cloud()
+            self._get_BIG_DICT_points_pixel_to_3d()    # store the relation
+            self.FIND_3D_POINTS = True
+        else:
+            self._get_pts3D_Nx3_from_BIG_DICT()    # get the 3d points
+            self._PNPSolver_img2_pts_and_3DPoints()
 
     def load_image_left(self, img_path):
         img_color, img_gray = self._load_image(img_path)
@@ -161,6 +167,15 @@ class CameraRelocation:
         if self.img1.key_points is None:
             self.img1.key_points, self.img1.descriptors = kd_utils.get_keypoints_and_descripotrs(
                 self.feature_detector, self.descriptor_extractor,
+                self.img1.img_gray)
+        elif not len(self.img1.key_points) == len(
+                self.img1.descriptors
+        ):    # not the same, aka, keypoints have been updated, but not descriptors
+            print(
+                "We are going to use the existing keypoints to calculate the descriptors"
+            )
+            __, self.img1.descriptors = kd_utils.get_keypoints_and_descripotrs_with_known_keypoints( # note, we will not replace the keypoints at all!!
+                self.descriptor_extractor, self.img1.key_points,
                 self.img1.img_gray)
 
         self.img2.key_points, self.img2.descriptors = kd_utils.get_keypoints_and_descripotrs(
@@ -246,8 +261,7 @@ class CameraRelocation:
         self.R = Rt_transform.EulerZYXDegree2R(mean_values[:3].reshape(3, 1))
         self.t = mean_values[3:].reshape(3, 1)
 
-        E_backward = pe_utils.find_E_from_R_t(self.R, self.t)
-
+        # E_backward = pe_utils.find_E_from_R_t(self.R, self.t)
         # import refine
         # refine.correctMatches_with_E(self.E, self.K, self.img1.key_points, self.img2.key_points, self.matches)
 
@@ -260,11 +274,15 @@ class CameraRelocation:
 
     def _plot_point_cloud(self):
 
-        print("In _plot_point_cloud")
+        print("In _plot_point_cloud:")
 
         Rt1 = np.hstack((np.eye(3), np.zeros((3, 1))))
 
         # self.t = self.t / (self.t[0] / -40.0) # NOTE HERE
+
+        self.R = np.eye(3)
+        self.t = np.array([-40, 0, 0]).reshape(3, 1)
+
         Rt2 = np.hstack([self.R, self.t])
 
         # t = np.array([-40, 0, -15]).reshape(3, 1)
@@ -274,6 +292,39 @@ class CameraRelocation:
         self.pts3D_Nx3 = depth_estimation.get_and_plot_point_cloud(
             self.img1.key_points, self.img2.key_points, self.matches,
             self.K_inv, Rt1, Rt2)
+
+    def _get_BIG_DICT_points_pixel_to_3d(self):
+        self.remain_kps1, self.remain_kps2 = pe_utils.get_matched_key_points(
+            self.img1.key_points, self.img2.key_points, self.matches)
+
+        assert len(self.pts3D_Nx3) == len(self.remain_kps1)
+
+        self.img1.key_points = self.remain_kps1    # we replace the key points to points with corresponding 3d
+
+        self.BIG_DICT_points_pixel_to_3d = dict()
+        for i in range(len(self.img1.key_points)):
+            self.BIG_DICT_points_pixel_to_3d[self.img1.key_points[
+                i]] = self.pts3D_Nx3[i]
+
+        assert len(self.pts3D_Nx3) == len(self.BIG_DICT_points_pixel_to_3d)
+        print("self.BIG_DICT_points_pixel_to_3d[self.img1.key_points[0]]".
+              format(self.BIG_DICT_points_pixel_to_3d[self.img1.key_points[0]]))
+
+    def _get_pts3D_Nx3_from_BIG_DICT(self):
+
+        self.remain_kps1, self.remain_kps2 = pe_utils.get_matched_key_points(
+            self.img1.key_points, self.img2.key_points, self.matches)
+
+        pts3D_Nx3_list = []
+
+        for kp in self.remain_kps1:
+            pts3D_Nx3_list.append(self.BIG_DICT_points_pixel_to_3d[kp])
+
+        assert len(pts3D_Nx3_list) == len(self.remain_kps1)
+
+        self.pts3D_Nx3 = np.array(pts3D_Nx3_list)
+
+        assert (self.pts3D_Nx3.shape[1] == 3)
 
     def _PNPSolver_img2_pts_and_3DPoints(self):
 
@@ -294,3 +345,24 @@ class CameraRelocation:
 
         R, _ = cv2.Rodrigues(rvec)
         pe_utils.DEBUG_Rt(R, tvec, "R t in _PNPSolver_img2_pts_and_3DPoints")
+
+        from ransac_Rt import get_zyxs_ts, get_nice_and_constant_zyxs_ts_list, print_out
+
+        Rs = [R]
+        ts = [tvec]
+        confidences = np.array([1])
+
+        zyxs_ts = get_zyxs_ts(Rs, ts)
+        # zyxs_ts_refine_list = get_nice_and_constant_zyxs_ts_list(zyxs_ts)
+        zyxs_ts_refine_list = zyxs_ts
+
+        print_out(
+            zyxs_ts,
+            confidences,
+            zyxs_ts_refine_list,
+            im1_file_name=self.img1.base_name,
+            im2_file_name=self.img2.base_name + 'PnP',
+            folder_name=self.output_folder)
+
+    def _PNPSolver_with_already_3DPoints(self):
+        pass
