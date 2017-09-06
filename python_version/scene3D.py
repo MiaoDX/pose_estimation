@@ -113,7 +113,7 @@ class CameraRelocation:
             self._find_camera_matrices_rt()
         else:
             self._refine_rt_with_ransac()
-
+        """
         if not self.FIND_3D_POINTS:    # we have not estimated the 3d points
             self._plot_point_cloud()
             self._get_BIG_DICT_points_pixel_to_3d()    # store the relation
@@ -121,6 +121,7 @@ class CameraRelocation:
         else:
             self._get_pts3D_Nx3_from_BIG_DICT()    # get the 3d points
             self._PNPSolver_img2_pts_and_3DPoints()
+        """
 
     def load_image_left(self, img_path):
         img_color, img_gray = self._load_image(img_path)
@@ -233,7 +234,7 @@ class CameraRelocation:
 
             pe_utils.DEBUG_Rt(self.R, self.t, "R t from linear algebra")
 
-    def _refine_rt_with_ransac(self, split_num=100, thres=0.7):
+    def _refine_rt_with_ransac(self, split_num=100, thres=0.5):
 
         from ransac_Rt import split_matches_and_remove_less_confidence, get_zyxs_ts, get_nice_and_constant_zyxs_ts_list, print_out
 
@@ -242,7 +243,11 @@ class CameraRelocation:
             split_num, thres)
 
         zyxs_ts = get_zyxs_ts(Rs, ts)
-        zyxs_ts_refine_list = get_nice_and_constant_zyxs_ts_list(zyxs_ts)
+
+        if len(zyxs_ts) >= 2:    # just one case
+            zyxs_ts_refine_list = get_nice_and_constant_zyxs_ts_list(zyxs_ts)
+        else:
+            zyxs_ts_refine_list = zyxs_ts
 
         print_out(
             zyxs_ts,
