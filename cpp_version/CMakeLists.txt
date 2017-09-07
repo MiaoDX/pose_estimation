@@ -2,22 +2,41 @@ project(relative-pose-5-pint)
 
 cmake_minimum_required(VERSION 2.8)
 
-#include( $ENV{OpenCV2_DIR}/OpenCVConfig.cmake )
+# GLOBAL setting
+set (NECESSARY_LIBS_DIR C:/tools/cmake_install_libs/pose_estimation)
+
+# User options
+# User options
+set( USE_CV3 FALSE )
+#set( USE_CV3 TRUE ) # comment this to use OpenCV 2.x
+
+message(STATUS "USE_CV3 value:${USE_CV3}")
+if (USE_CV3)
+message(STATUS "Using OpenCV 3.x ...")
 include( $ENV{OpenCV3_DIR}/OpenCVConfig.cmake )
 add_definitions(-D_CV_VERSION_3) # `#ifdef _CV_VERSION_3`
+
+# five point
+set (fivePointLibDIR ${NECESSARY_LIBS_DIR}/fivePoint/cv330)
+else()
+message(STATUS "Using OpenCV 2.x ...")
+include( $ENV{OpenCV2_DIR}/OpenCVConfig.cmake )
+
+set (fivePointLibDIR ${NECESSARY_LIBS_DIR}/fivePoint/cv2413)
+endif() # (USE_CV3)
 
 message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
 message(STATUS "OpenCV_LIBS: ${OpenCV_LIBS}")
 
+
 set(GET_RT_ALGO ${CMAKE_SOURCE_DIR}/getRTAlgo)
 set(POSE_ESTIMATION ${CMAKE_SOURCE_DIR}/pose_estimation)
 
-
-set (NECESSARY_LIBS_DIR C:/tools/cmake_install_libs/pose_estimation)
-# five point
-set (fivePointLibDIR ${NECESSARY_LIBS_DIR}/fivePoint)
+# five points
+message(STATUS "fivePointLibDIR:${fivePointLibDIR}")
 include (${fivePointLibDIR}/lib/cmake/fivePoint/fivePointConfig.cmake)
 include_directories( ${fivePointLibDIR}/include )
+
 
 # cluster with alglib
 set (AlglibClusterLibDIR ${NECESSARY_LIBS_DIR}/AlglibCluster)
