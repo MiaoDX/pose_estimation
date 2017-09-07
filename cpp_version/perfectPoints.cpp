@@ -101,7 +101,9 @@ int main()
         pts2.push_back ( Point2f ( x2s.row ( i ) ) );
     }
 
-
+    
+    int test_num = 50;
+    double start = 0.0, end = 0.0, elapse = 0.0, avg_time_us = 0.0; // tick counting
 #ifdef _CV_VERSION_3
     std::cout << "=====================================================" << std::endl;
     std::cout << "calculateRT_CV3:" << std::endl;
@@ -111,15 +113,14 @@ int main()
 
 
     cout << "Do some timing test" << endl;
-    double start = cv::getTickCount ();
-    int test_num = 50;
+    start = cv::getTickCount ();
     for ( int i = 0; i < test_num; i++ ) {
         calculateRT_CV3 ( pts1, pts2, K, R, t, false );
         //DEBUG_RT ( R, t );
     }
-    double end = cv::getTickCount ();
-    double elapse = (end - start) / cv::getTickFrequency ();
-    double avg_time_us = (elapse / test_num) * 1000000;
+    end = cv::getTickCount ();
+    elapse = (end - start) / cv::getTickFrequency ();
+    avg_time_us = (elapse / test_num) * 1000000;
     cout << "Average execution time: " << avg_time_us << " us" << endl;
     cout << endl;
 
