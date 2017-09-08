@@ -198,6 +198,8 @@ void _calculateRT_CV3_with_ratio(
     //-- 计算本质矩阵
     Mat E = findEssentialMat(points1, points2, K);
 
+    //cout << "E matrix:\n" << E << endl;
+
     Mat inliersMask;
     //-- 从本质矩阵中恢复旋转和平移信息.re
     recoverPose(E, points1, points2, K, R, t, inliersMask);
@@ -211,9 +213,11 @@ void _calculateRT_CV3_with_ratio(
     }
 
 
-    cout << "In recoverPose, points:" << points1.size() << "->" << inliers_pts1.size() << endl;
+
 
     inliers_ratio = static_cast<double>(inliers_pts1.size()) / points1.size();
+
+    cout << "In recoverPose, points:" << points1.size () << "->" << inliers_pts1.size () << ", ratio:" << inliers_ratio << endl;
 #endif
 }
 
@@ -358,9 +362,9 @@ void calcuateRT_test( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, 
     calculateRT_CV3(points1, points2, K, R, t);
     DEBUG_RT(R, t);
 
-    Mat R_5, t_5;
-    calculateRT_5points(points1, points2, K, R_5, t_5, points1.size());
-    DEBUG_RT(R_5, t_5);
+    //Mat R_5, t_5;
+    //calculateRT_5points(points1, points2, K, R_5, t_5, points1.size());
+    //DEBUG_RT(R_5, t_5);
 }
 
 void calcuateRT_Ransac_test ( const vector<KeyPoint> kps1, const vector<KeyPoint> kps2, const vector<DMatch>& matches, const Mat& K )

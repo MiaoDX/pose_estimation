@@ -101,7 +101,7 @@ int main()
         pts2.push_back ( Point2f ( x2s.row ( i ) ) );
     }
 
-    
+
     int test_num = 50;
     double start = 0.0, end = 0.0, elapse = 0.0, avg_time_us = 0.0; // tick counting
 #ifdef _CV_VERSION_3
