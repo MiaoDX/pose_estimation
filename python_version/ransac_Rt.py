@@ -68,11 +68,14 @@ def split_matches_and_remove_less_confidence(kps1,
     ts = []
     confidences = []
 
-    R, t, matches_rp, matches_rp_bad = pe_utils.find_R_t_cv3(kps1, kps2, matches, K)
+    R, t, matches_rp, matches_rp_bad = pe_utils.find_R_t_cv3(
+        kps1, kps2, matches, K)
     conf = len(matches_rp) / len(matches)
     Rs.append(R)
     ts.append(t)
-    confidences.append(conf+100) # we are using this (add 100) to specify we are using all matches
+    confidences.append(
+        conf + 100
+    )    # we are using this (add 100) to specify we are using all matches
 
     splited_matches = split_the_matches(matches, splitnum)
 
@@ -86,7 +89,6 @@ def split_matches_and_remove_less_confidence(kps1,
 
         R, t, matches_rp, matches_rp_bad = pe_utils.recoverPose_from_E_cv3(
             E, kps1, kps2, matches_E, K)
-
         """        
         R2, t2, matches_rp2, matches_rp_bad2 = pe_utils.find_R_t_cv3(kps1, kps2, chosen_matches, K)
 

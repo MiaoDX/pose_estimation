@@ -71,7 +71,7 @@ def test_camera_relocation_5_points_ransac(base_dir, log_dir="20170905_2_"):
 if __name__ == '__main__':
 
     base_dir = "H:/projects/SLAM/dataset/cartoon_2/"
-    test_camera_relocation_5_points_ransac(base_dir, log_dir="20170908_test_mask_E_")
-
+    test_camera_relocation_5_points_ransac(
+        base_dir, log_dir="20170908_test_mask_E_")
 
     # test_all()
