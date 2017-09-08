@@ -17,44 +17,32 @@ import numpy as np
 from scene3D import CameraRelocation
 
 
-def main():
-    pass
-    #scene.plot_optic_flow()
-    #scene.draw_epipolar_lines()
-    #scene.plot_rectified_images(feat_mode="orb")
-
-    # draw 3D point cloud of fountain
-    # use "pan axes" button in pyplot to inspect the cloud (rotate and zoom
-    # to convince you of the result)
-    # scene.plot_point_cloud(feat_mode="orb")
-    #scene.plot_point_cloud()
-
-
-def test_camera_relocation():
+def test_camera_relocation_tweak_manaually():
     import traceback
 
     K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935],
                   [0, 0, 1]])    # Canon5DMarkIII-EF50mm
     d = np.array([0.0, 0.0, 0.0, 0.0, 0.0]).reshape(1, 5)
 
-    base_dir = "H:/projects/SLAM/python_code/dataset/our/trajs2/"
+    base_dir = "H:/projects/SLAM/dataset/cartoon_2/"
+    out_folder = "20170908_cartoon_2"
 
     # cameraRelocation = CameraRelocation(K, d, feature_name="BRIEF")
 
     cameraRelocation = CameraRelocation(
-        K, d, feature_name="ORB", output_folder="20170904")
+        K, d, feature_name="ORB", output_folder=out_folder)
     cameraRelocation.set_feature_detector_descriptor_extractor(
         "ORB", feature_detector_params=dict(nfeatures=2000))
-    """
-    strs = [str(x) for x in range(1, 10)]
-    strs.extend(['1a', '1b', '1c', '4a', '7a', '7b'])
-    strs = sorted(strs)
-    """
-    strs = ['1', '4', '2', '3', '4', '5', '6', '7', '8', '9']
 
-    # for i in range(len(strs) - 1):
+    strs = [str(x) for x in range(1, 10)]
+    strs.extend(['1a', '1b', '1c', '1d', '4a', '4b', '7a', '7b'])
+    strs = sorted(strs)
+
+    # strs = ['1', '4', '2', '3', '4', '5', '6', '7', '8', '9']
+    strs = ['1', '4', '2']
 
     i = 0
+
     im1_file = base_dir + strs[i] + ".jpg"
     print("Using {} as the reference image".format(im1_file))
 
@@ -71,47 +59,6 @@ def test_camera_relocation():
             continue
 
 
-def test_camera_relocation_5_points_ransac():
-    import traceback
-
-    K = np.array([[8607.8639, 0, 2880.72115], [0, 8605.4303, 1913.87935],
-                  [0, 0, 1]])    # Canon5DMarkIII-EF50mm
-    d = np.array([0.0, 0.0, 0.0, 0.0, 0.0]).reshape(1, 5)
-
-    base_dir = "H:/projects/SLAM/dataset/cartoon_1/"
-
-    # cameraRelocation = CameraRelocation(K, d, feature_name="BRIEF")
-
-    cameraRelocation = CameraRelocation(
-        K, d, feature_name="ORB", output_folder="20170905_cartoon_1")
-    cameraRelocation.set_feature_detector_descriptor_extractor(
-        "ORB", feature_detector_params=dict(nfeatures=2000))
-
-    strs = [str(x) for x in range(1, 10)]
-    strs.extend(['1a', '1b', '1c', '1d', '4a', '4b', '7a', '7b'])
-    strs = sorted(strs)
-
-    # strs = ['1', '4', '2', '3', '4', '5', '6', '7', '8', '9']
-
-    for i in range(len(strs) - 1):
-        im1_file = base_dir + strs[i] + ".jpg"
-        print("Using {} as the reference image".format(im1_file))
-
-        cameraRelocation.load_image_left(im1_file)
-        for j in range(i + 1, len(strs)):
-            im2_file = base_dir + strs[j] + ".jpg"
-            print("Using {} as the testing image".format(im2_file))
-            try:
-                cameraRelocation.forward(im2_file)
-            except:
-                print("Somthing went wrong when calc {} and {}".format(
-                    im1_file, im2_file))
-                traceback.print_exc()
-                continue
-
-
 if __name__ == '__main__':
-    #main()
-    # test_camera_relocation()
 
-    test_camera_relocation_5_points_ransac()
+    test_camera_relocation_tweak_manaually()

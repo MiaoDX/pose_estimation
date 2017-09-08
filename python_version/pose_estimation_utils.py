@@ -108,6 +108,56 @@ def find_E_and_matches_cv2(kp1, kp2, matches, K):
     return E, matches_F, matches_F_bad
 
 
+def find_R_t_cv3(kp1, kp2, matches, K):
+    """
+    This is the same as using find_E_and_matches_cv3 + recoverPose_from_E_cv3, but using mask_E directly,
+    to reduce potential overhead.
+    :param kp1:
+    :param kp2:
+    :param matches:
+    :param K:
+    :return:
+    """
+    assert kp1 is not None and kp2 is not None and matches is not None and K is not None
+    assert len(kp1) >= len(matches) and len(kp2) >= len(matches)
+
+    pts1, pts2, _ = key_points_to_matched_pixel_points(kp1, kp2, matches)
+
+    print("pts1.shape:{}".format(pts1.shape))
+    print("pts2.shape:{}".format(pts2.shape))
+    """ findEssentialMat(points1, points2, cameraMatrix[, method[, prob[, threshold[, mask]]]]) -> retval, mask """
+    # E, mask_E = cv2.findEssentialMat(pts1, pts2, cameraMatrix=K, method=cv2.RANSAC, prob=0.999, threshold=0.2)
+    E, mask_E = cv2.findEssentialMat(pts1, pts2, cameraMatrix=K)
+
+    no_zero_mask_E = cv2.countNonZero(mask_E)
+
+    print(
+        "In find_R_t_cv3 directly, find E, matches:{} -> {}".format(len(matches), no_zero_mask_E))
+
+    _, R, t, mask_rp = cv2.recoverPose(
+        E, pts1, pts2,
+        K, mask=mask_E)
+
+    # We select only inlier points
+    # pts1_rp = pts1[mask_rp.ravel() != 0]
+    # pts2_rp = pts2[mask_rp.ravel() != 0]
+    matches_rp = []
+    matches_rp_bad = []
+    for i in range(len(matches)):
+        if mask_rp[i] != 0:
+            #print(mask_rp[i])
+            assert mask_rp[i] == 1
+            # assert mask_rp[i] == 255    # this is special, pretty special
+            matches_rp.append(matches[i])
+        else:
+            matches_rp_bad.append(matches[i])
+
+    print("In find_R_t_cv3 directly, recoverPose, points:{} -> inliner:{}".format(
+        len(matches), len(matches_rp)))
+
+    return R, t, matches_rp, matches_rp_bad
+
+
 def find_E_and_matches_cv3(kp1, kp2, matches, K):
     assert kp1 is not None and kp2 is not None and matches is not None and K is not None
     assert len(kp1) >= len(matches) and len(kp2) >= len(matches)
