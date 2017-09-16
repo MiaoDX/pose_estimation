@@ -6,7 +6,6 @@ cmake_minimum_required(VERSION 2.8)
 set (NECESSARY_LIBS_DIR C:/tools/cmake_install_libs/pose_estimation)
 
 # User options
-# User options
 set( USE_CV3 FALSE )
 set( USE_CV3 TRUE ) # comment this to use OpenCV 2.x
 
