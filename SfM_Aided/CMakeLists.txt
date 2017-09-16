@@ -1,3 +1,4 @@
+project(SfM_based_pose_estimation)
 cmake_minimum_required(VERSION 2.8)
 
 # User options

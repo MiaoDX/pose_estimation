@@ -82,7 +82,7 @@ def incremental_SfM_pipeline(dataset_dir, output_dir, K_value):
   # pMatches = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeMatches"),  "--input_file", matches_dir+"/sfm_data.json", "--out_dir", matches_dir, "--geometric_model", "e", "--guided_matching", "1"] )
   pMatches.wait()
   
-
+  
 
   # Create the reconstruction if not present
   if not os.path.exists(reconstruction_dir):
@@ -93,6 +93,13 @@ def incremental_SfM_pipeline(dataset_dir, output_dir, K_value):
   pRecons.wait()
   
 
+  print("4.1 Convert format for easy looking")
+  cvt_SfM_data(reconstruction_dir, reconstruction_dir, "sfm_data.bin")
+  
+  # print ("4.2 Colorize Structure") # no need to do this, to save time
+  # pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeSfM_DataColor"),  "-i", reconstruction_dir+"/"+incremental_SfM_data_name, "-o", os.path.join(reconstruction_dir,"colorized_incremental_SfM.ply")] )
+  # pRecons.wait()
+
   # optional, compute final valid structure from the known camera poses, a refine part
   # Note the matches.e.bin or matches.f.bin
   print ("5. Structure from Known Poses (robust triangulation)")
@@ -100,23 +107,10 @@ def incremental_SfM_pipeline(dataset_dir, output_dir, K_value):
   pRecons.wait()
   
 
-
-  """
-  Additional operation
-  """
-
-  print("4.1 Convert format for easy looking")
-  cvt_SfM_data(reconstruction_dir, reconstruction_dir, "sfm_data.bin")
-
-  # print ("4.2 Colorize Structure") # no need to do this, to save time
-  # pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeSfM_DataColor"),  "-i", reconstruction_dir+"/"+incremental_SfM_data_name, "-o", os.path.join(reconstruction_dir,"colorized_incremental_SfM.ply")] )
-  # pRecons.wait()
-
-
-  print("6.1 Convert format for easy looking")
+  print("5.1 Convert format for easy looking")
   cvt_SfM_data(reconstruction_dir, reconstruction_dir, "robust.bin")
 
-  # print ("6.2 Colorize Structure")
+  # print ("5.2 Colorize Structure")
   # pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeSfM_DataColor"),  "-i", reconstruction_dir+"/robust.bin", "-o", os.path.join(reconstruction_dir,"robust_colorized.ply")] )
   # pRecons.wait()
 
@@ -169,17 +163,21 @@ if __name__ == "__main__":
   """
   Some user defined variables
   """
-  dataset_dir = WORK_DIR+"dataset_cartoon_1/"
-  output_dir = "sequential_cartoon_1_jpg"
-  # dataset_dir = WORK_DIR+"dataset_Marx_1/"
-  # output_dir = "sequential_Marx_1_jpg"
+  # dataset_dir = WORK_DIR+"dataset_cartoon_1/"
+  # output_dir = "sequential_cartoon_1_jpg"
+  # # dataset_dir = WORK_DIR+"dataset_Marx_1/"
+  # # output_dir = "sequential_Marx_1_jpg"
+  # K_value = "8607.8639;0;2880.72115;0;8605.4303;1913.87935;0;0;1" # K for big images, jpg
+  # suffix = ".jpg"
 
-
-  K_value = "8607.8639;0;2880.72115;0;8605.4303;1913.87935;0;0;1"
+  dataset_dir = WORK_DIR+"dataset_cartoon_1_bmp/"
+  output_dir = "sequential_cartoon_1_bmp"
+  K_value = "1444.29449;0.0;482.68264;0.0;1444.79783;319.3993;0.0;0.0;1" # K for small images, bmp
+  suffix = ".jpg" # we should convert the suffix first
 
 
   incremental_SfM_pipeline(dataset_dir, output_dir, K_value)
-
+  
 
   # localization_pipeline(dataset_dir, output_dir, 
   # "robust.bin",
@@ -189,13 +187,13 @@ if __name__ == "__main__":
 
 
   strs = [str(x) for x in range(1, 10)]
-  strs.extend(['1a', '1b', '1c', '1d', '4a', '4b', '7a', '7b'])
+  # strs.extend(['1a', '1b', '1c', '1d', '4a', '4b', '7a', '7b'])
   strs = sorted(strs)
 
   for im in strs:
-    query = "query_"+im+".jpg"
+    query = "query_"+im+suffix
     localization_pipeline(dataset_dir, output_dir, 
     "robust.bin",
-    reference_im_name="1.jpg",
+    reference_im_name="reference_1"+suffix,
     query_im_name=query
     )

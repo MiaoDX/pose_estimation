@@ -140,12 +140,10 @@ int main(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  Views & views = sfm_data.views;
   Views new_views;
-  Intrinsics & intrinsics = sfm_data.intrinsics;
   std::map<std::string, Vec3> faked_pos = get_faked_GPS ( sFakedGps_Filename );
 
-  for (const auto & view_it : sfm_data.GetViews() )
+  for (const auto& view_it : sfm_data.GetViews() )
   {
 
     View* old_view = view_it.second.get ();
@@ -156,36 +154,48 @@ int main(int argc, char **argv)
 
     cout << "Going to add view to " << view_filename << "..." << endl;
 
+    /*
+     *       sImgPath,
+      view_id,
+      intrinsic_id,
+      pose_id,
+      width,
+      height
+     */
+    //ViewPriors v ( old_view->s_Img_path, old_view->id_view, old_view->id_intrinsic, old_view->id_pose, old_view->ui_width, old_view->ui_height );
+    ViewPriors v ( old_view->s_Img_path, new_views.size (), new_views.size (), new_views.size (), old_view->ui_width, old_view->ui_height );
 
     const std::pair<bool, Vec3> gps_info = checkGPS_faked ( view_filename, faked_pos );
 
-    if (gps_info.first == false)
+    v.id_intrinsic = old_view->id_intrinsic;
+
+    if(gps_info.first == true )
     {
+        v.b_use_pose_center_ = true;
+        v.pose_center_ = gps_info.second;
+    }
+    else
+    {
+        v.b_use_pose_center_ = true;
+        v.center_weight_ = Vec3 ( 0, 0, 0 );
         cout << "Seems no valid GPS, continue to others" << endl;
-        continue;
     }
 
-    ViewPriors v ( old_view->s_Img_path, new_views.size (), new_views.size (), new_views.size (), old_view->ui_width, old_view->ui_height );
-      //ViewPriors v ( view_filename, views.size (), views.size (), views.size (), width, height );
     
     
-    v.id_intrinsic = old_view->id_intrinsic;
-    v.b_use_pose_center_ = true;
-    v.pose_center_ = gps_info.second;
-
     // prior weights
     //if ( prior_w_info.first == true )
     //{
     //    v.center_weight_ = prior_w_info.second;
     //}
 
-    cout << "Add view done" <<endl;
+    
     // Add the view to the sfm_container
     new_views[v.id_view] = std::make_shared<ViewPriors> ( v );
+    cout << "Add view done" << endl;
   }
+
   sfm_data.views = new_views; // we re-assign it
-
-
 
   // Export the SfM_Data scene in the expected format
   if (Save(

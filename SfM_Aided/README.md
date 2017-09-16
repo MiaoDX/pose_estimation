@@ -65,11 +65,29 @@ The `sfm_init_data` store images captured the initialize process, which can vary
 9 3 6
 ```
 
-Number means the order images are taken, for example, `1` and `4` are the first and forth images, and they have known translation provided by our motion equipment. And between the movements, we try not to change the rotation of the platform, so we can get motion prior.
+Number means the order images are taken, for example, `1` and `4` are the first and forth images, and they have known translation provided by our motion equipment. And between the movements, we try not to change the rotation of the platform, so we can get motion prior. The `reference.jpg` is the image we want to regress, and it dose not have any motion prior.
 
-
-The `fake_gps_file.txt` contains the motion prior we got, and used as `GPS` data for openMVG processing, so we can have direct measure for the translation got from the SfM. The `reference.jpg` is the image we want to regress, and it dose not have any motion prior.
+The `fake_gps_file.txt` (see [example_data/fake_gps_file.txt](example_data/fake_gps_file.txt) for an example) contains the motion prior we got, and can be used as `GPS` data for openMVG processing, thus we have certain translation magnitude for SfM. 
 
 The `sfm_query_data` is the folder contains the query image.
 
-Once the images are provided, it will be pretty straightforward.
+Once the images are provided, it will be pretty straightforward, just see the example code.
+
+## NOTES
+
+* openMVG support limited image formats -- ppm/pgm, jpeg, png, tiff. So, take care.
+
+```
+# we should convert with OpenCV or somewhat.
+python convert2jpg.py --image_dir /path/to/images
+```
+
+* The type of `View` in `sfm_data` should be constant, that is, it can only be `View` or `ViewPriors`, so, if we want to add `reference.jpg` with no motion info, we should still make it a `ViewPriors`. The trick is:
+
+```
+ViewPriors v (...)
+v.b_use_pose_center_ = true;
+v.center_weight_ = Vec3 ( 0, 0, 0 );
+```
+
+Thus, the center_weight of $0$ meets everybody's need.
