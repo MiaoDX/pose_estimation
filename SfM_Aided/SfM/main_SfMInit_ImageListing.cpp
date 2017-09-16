@@ -319,7 +319,7 @@ int main(int argc, char **argv)
       && !exifReader->getModel().empty();
 
     // Consider the case where the focal is provided manually
-    if ( !bHaveValidExifMetadata || focal_pixels != -1)
+    if ( !bHaveValidExifMetadata || sKmatrix.size () > 0 || focal_pixels != -1)
     {
       if (sKmatrix.size() > 0) // Known user calibration K matrix
       {
