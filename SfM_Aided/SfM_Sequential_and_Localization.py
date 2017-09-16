@@ -16,9 +16,9 @@ import sys
 OPENMVG_SFM_BIN = "H:/projects/SLAM/sfm/openMVG_develop/src/release/Windows-AMD64-Release/Release"
 OPENMVG_Localization_BIN = OPENMVG_SFM_BIN
 
-
-OPENMVG_SFM_MINE_BIN = "H:/projects/SLAM/sfm/openMVG_example/openMVG_SfM_official/build/SfM/Release"
-OPENMVG_Geodesy_MINE_BIN = "H:/projects/SLAM/sfm/openMVG_example/openMVG_SfM_official/build/Geodesy/Release"
+WORK_DIR = "H:/projects/SLAM/pose_estimation/SfM_Aided/"
+OPENMVG_SFM_MINE_BIN = WORK_DIR+"build/SfM/Release"
+OPENMVG_Geodesy_MINE_BIN = WORK_DIR+"build/Geodesy/Release"
 
 
 def cvt_SfM_data(input_dir, output_dir, filename):
@@ -169,16 +169,16 @@ if __name__ == "__main__":
   """
   Some user defined variables
   """
-  # dataset_dir = "H:/projects/SLAM/sfm/openMVG_example/cartoon_1_dataset/"
-  # output_dir = "sequential_cartoon_1_jpg"
-  dataset_dir = "H:/projects/SLAM/sfm/openMVG_example/Marx_1_dataset/"
-  output_dir = "sequential_Marx_1_jpg"
+  dataset_dir = WORK_DIR+"dataset_cartoon_1/"
+  output_dir = "sequential_cartoon_1_jpg"
+  # dataset_dir = WORK_DIR+"dataset_Marx_1/"
+  # output_dir = "sequential_Marx_1_jpg"
 
 
   K_value = "8607.8639;0;2880.72115;0;8605.4303;1913.87935;0;0;1"
 
 
-  # incremental_SfM_pipeline(dataset_dir, output_dir, K_value)
+  incremental_SfM_pipeline(dataset_dir, output_dir, K_value)
 
 
   # localization_pipeline(dataset_dir, output_dir, 
