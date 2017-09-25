@@ -173,18 +173,24 @@ namespace Csharp_call_SfM
             //string output_dir = WORK_DIR + "sequential_cartoon_1_bmp_Csharp";
             //string K_value = "1444.29449;0.0;482.68264;0.0;1444.79783;319.3993;0.0;0.0;1"; // K for small images, bmp
 
-            string dataset_dir = WORK_DIR + "dataset_Marx_1/";
-            string output_dir = WORK_DIR + "sequential_Marx_1_jpg_Csharp";
+            //string dataset_dir = WORK_DIR + "dataset_Marx_1/";
+            //string output_dir = WORK_DIR + "sequential_Marx_1_jpg_Csharp";
+            //string K_value = "8607.8639;0;2880.72115;0;8605.4303;1913.87935;0;0;1";// # K for big images, jpg
+
+            string dataset_dir = WORK_DIR + "dataset_cartoon_1_less_pic/";
+            string output_dir = WORK_DIR + "sequential_dataset_cartoon_1_less_jpg_Csharp";
             string K_value = "8607.8639;0;2880.72115;0;8605.4303;1913.87935;0;0;1";// # K for big images, jpg
 
+
+            
 
             //incremental_SfM_pipeline(dataset_dir, output_dir, K_value);
 
 
             //localization_pipeline(dataset_dir, output_dir, "robust.bin", "reference_2.jpg",  "query_1.jpg");
-            localization_pipeline(dataset_dir, output_dir, "robust.bin", "1.jpg", "query_1.jpg");
+            localization_pipeline(dataset_dir, output_dir, "robust.bin", "1.jpg", "query_4.jpg");
 
-            //Console.ReadKey(true);
+            Console.ReadKey(true);
 
         }
 

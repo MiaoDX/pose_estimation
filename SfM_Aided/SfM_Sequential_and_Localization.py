@@ -170,30 +170,37 @@ if __name__ == "__main__":
   # K_value = "8607.8639;0;2880.72115;0;8605.4303;1913.87935;0;0;1" # K for big images, jpg
   # suffix = ".jpg"
 
-  dataset_dir = WORK_DIR+"dataset_cartoon_1_bmp/"
-  output_dir = WORK_DIR + "sequential_cartoon_1_bmp"
+  # dataset_dir = WORK_DIR+"dataset_cartoon_1_bmp/"
+  # output_dir = WORK_DIR + "sequential_cartoon_1_bmp"
+  # K_value = "1444.29449;0.0;482.68264;0.0;1444.79783;319.3993;0.0;0.0;1" # K for small images, bmp
+  # suffix = ".jpg" # we should convert the suffix first
+
+  dataset_dir = WORK_DIR+"dataset_cartoon_1_less_pic/"
+  output_dir = WORK_DIR + "sequential_dataset_cartoon_1_less_pic"
   K_value = "1444.29449;0.0;482.68264;0.0;1444.79783;319.3993;0.0;0.0;1" # K for small images, bmp
-  suffix = ".jpg" # we should convert the suffix first
 
 
-  # incremental_SfM_pipeline(dataset_dir, output_dir, K_value)
+
+
+
+  incremental_SfM_pipeline(dataset_dir, output_dir, K_value)
   
 
-  # localization_pipeline(dataset_dir, output_dir, 
-  # "robust.bin",
-  # reference_im_name="reference_2.jpg",
-  # query_im_name="query_1.jpg"
-  # )
+  localization_pipeline(dataset_dir, output_dir, 
+  "robust.bin",
+  reference_im_name="1.jpg",
+  query_im_name="query_2.jpg"
+  )
 
 
-  strs = [str(x) for x in range(1, 10)]
-  # strs.extend(['1a', '1b', '1c', '1d', '4a', '4b', '7a', '7b'])
-  strs = sorted(strs)
+  # strs = [str(x) for x in range(1, 10)]
+  # # strs.extend(['1a', '1b', '1c', '1d', '4a', '4b', '7a', '7b'])
+  # strs = sorted(strs)
 
-  for im in strs:
-    query = "query_"+im+suffix
-    localization_pipeline(dataset_dir, output_dir, 
-    "robust.bin",
-    reference_im_name="reference_1"+suffix,
-    query_im_name=query
-    )
+  # for im in strs:
+  #   query = "query_"+im+suffix
+  #   localization_pipeline(dataset_dir, output_dir, 
+  #   "robust.bin",
+  #   reference_im_name="reference_1"+suffix,
+  #   query_im_name=query
+  #   )
