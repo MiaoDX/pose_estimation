@@ -1,9 +1,41 @@
+# Export no symbols by default (if the compiler supports it).
+# This makes e.g. GCC's "visibility behavior" consistent with MSVC's. 
+# On Windows/MSVC this is a noop.
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
+# Always include the source and build directories in the include path.
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+
 ###
 # Relative pose estimation
 ###
+include_directories(${CMAKE_SOURCE_DIR}/SfM)
 include_directories(${CMAKE_SOURCE_DIR}/SfM/Rt_transform)
-ADD_EXECUTABLE(relativePosePair relativePosePair.cpp ${CMAKE_SOURCE_DIR}/SfM/Rt_transform/Rt_transform.cpp)
+
+# create the shared library
+add_library(relativePosePair SHARED relativePosePair.cpp ${CMAKE_SOURCE_DIR}/SfM/Rt_transform/Rt_transform.cpp)
 TARGET_LINK_LIBRARIES(relativePosePair
+  openMVG_system
+  openMVG_image
+  openMVG_features
+  openMVG_sfm
+  stlplus
+  )
+
+# generate export header automatically
+include (GenerateExportHeader)
+GENERATE_EXPORT_HEADER(relativePosePair
+             BASE_NAME relativePosePair
+             EXPORT_MACRO_NAME SHARED_EXPORT
+             EXPORT_FILE_NAME shared_EXPORTS.h
+             STATIC_DEFINE SHARED_EXPORTS_BUILT_AS_STATIC)
+
+
+ADD_EXECUTABLE(relativePosePair_test relativePosePair_test.cpp)
+TARGET_LINK_LIBRARIES(relativePosePair_test
+  relativePosePair
   openMVG_system
   openMVG_image
   openMVG_features

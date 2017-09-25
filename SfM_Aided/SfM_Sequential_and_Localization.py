@@ -155,7 +155,7 @@ def localization_pipeline(dataset_dir, output_dir,
   pLocal.wait()
 
   print ("2. Calc relative pose of {}, regrding to reference image {}".format(query_im_name, reference_im_name))
-  pRelativePose = subprocess.Popen( [os.path.join(OPENMVG_SFM_MINE_BIN, "relativePosePair"),  "--input_file",  localization_dir+"/sfm_data_expanded.json", "--reference_im_name", reference_im_name, "--query_im_name", query_im_name], shell=True,stdout = open(log_file,'a+') )
+  pRelativePose = subprocess.Popen( [os.path.join(OPENMVG_SFM_MINE_BIN, "relativePosePair_test"),  "--input_file",  localization_dir+"/sfm_data_expanded.json", "--reference_im_name", reference_im_name, "--query_im_name", query_im_name], shell=True,stdout = open(log_file,'a+') )
   pRelativePose.wait()
 
 
@@ -164,19 +164,19 @@ if __name__ == "__main__":
   Some user defined variables
   """
   # dataset_dir = WORK_DIR+"dataset_cartoon_1/"
-  # output_dir = "sequential_cartoon_1_jpg"
+  # output_dir = WORK_DIR + "sequential_cartoon_1_jpg"
   # # dataset_dir = WORK_DIR+"dataset_Marx_1/"
-  # # output_dir = "sequential_Marx_1_jpg"
+  # # output_dir = WORK_DIR + "sequential_Marx_1_jpg"
   # K_value = "8607.8639;0;2880.72115;0;8605.4303;1913.87935;0;0;1" # K for big images, jpg
   # suffix = ".jpg"
 
   dataset_dir = WORK_DIR+"dataset_cartoon_1_bmp/"
-  output_dir = "sequential_cartoon_1_bmp"
+  output_dir = WORK_DIR + "sequential_cartoon_1_bmp"
   K_value = "1444.29449;0.0;482.68264;0.0;1444.79783;319.3993;0.0;0.0;1" # K for small images, bmp
   suffix = ".jpg" # we should convert the suffix first
 
 
-  incremental_SfM_pipeline(dataset_dir, output_dir, K_value)
+  # incremental_SfM_pipeline(dataset_dir, output_dir, K_value)
   
 
   # localization_pipeline(dataset_dir, output_dir, 
