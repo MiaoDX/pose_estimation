@@ -34,7 +34,7 @@ def cvt_SfM_data(input_dir, output_dir, filename):
     pCvt.wait()
 
 
-def incremental_SfM_pipeline(dataset_dir, output_dir, K_value):
+def incremental_SfM_pipeline(dataset_dir, output_dir, K_value, suffix='.jpg'):
   init_dir = os.path.join(dataset_dir, "sfm_init_data") # folder of train images, should make sure
   faked_gps_path = os.path.join(dataset_dir, "fake_gps_file.txt")
 
@@ -89,8 +89,10 @@ def incremental_SfM_pipeline(dataset_dir, output_dir, K_value):
       os.mkdir(reconstruction_dir)
 
   print ("4. Do Sequential/Incremental reconstruction")
-  pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_IncrementalSfM"),  "--input_file", matches_dir+"/sfm_data.json", "--matchdir", matches_dir, "--outdir", reconstruction_dir, "--refineIntrinsics", "NONE", "--prior_usage"] )
+  pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_IncrementalSfM"),  "--input_file", matches_dir+"/sfm_data.json", "--matchdir", matches_dir, "--outdir", reconstruction_dir, "--refineIntrinsics", "NONE", "--prior_usage", "--initialPairA", "1"+suffix, "--initialPairB", "4"+suffix] )
   pRecons.wait()
+  # pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_MINE_BIN, "openMVG_main_IncrementalSfM"),  "--input_file", matches_dir+"/sfm_data.json", "--matchdir", matches_dir, "--outdir", reconstruction_dir, "--refineIntrinsics", "NONE", "--prior_usage"] )
+  # pRecons.wait()
   
 
   print("4.1 Convert format for easy looking")
@@ -185,7 +187,7 @@ if __name__ == "__main__":
 
 
 
-  #incremental_SfM_pipeline(dataset_dir, output_dir, K_value)
+  incremental_SfM_pipeline(dataset_dir, output_dir, K_value)
   
 
   localization_pipeline(dataset_dir, output_dir, 
