@@ -128,7 +128,7 @@ def localization_pipeline(dataset_dir, output_dir,
   reconstruction_dir = os.path.join(output_dir, "reconstruction_sequential")
   localization_dir = os.path.join(output_dir, "Localization")
 
-  log_file = os.path.join(localization_dir,'localization_log_'+reference_im_name+'_'+query_im_name+'.txt')
+  log_file = os.path.join(localization_dir,'localization_log_'+reference_im_name[:-4]+'_'+query_im_name[:-4])
 
 
   query_im_path = os.path.join(query_dir, query_im_name)
@@ -151,12 +151,14 @@ def localization_pipeline(dataset_dir, output_dir,
   ##NOTE: the `-s –single_intrinsics` is rather important, it will not try to BA the intrinsics, leave our methods more stable
 
   print ("1. Localization ..")
-  pLocal = subprocess.Popen( [os.path.join(OPENMVG_Localization_BIN, "openMVG_main_SfM_Localization"),  "--input_file",  reconstruction_dir+"/"+incremental_SfM_data_name, "--match_dir", matches_dir, "--out_dir", localization_dir, "--match_out_dir", localization_dir, "--query_image_dir", query_im_path, "--single_intrinsics"], shell=True,stdout = open(log_file,'w') )
+  pLocal = subprocess.Popen( [os.path.join(OPENMVG_Localization_BIN, "openMVG_main_SfM_Localization"),  "--input_file",  reconstruction_dir+"/"+incremental_SfM_data_name, "--match_dir", matches_dir, "--out_dir", localization_dir, "--match_out_dir", localization_dir, "--query_image_dir", query_im_path, "--single_intrinsics"], shell=True,stdout = open(log_file+'.txt','w') )
   pLocal.wait()
 
   print ("2. Calc relative pose of {}, regrding to reference image {}".format(query_im_name, reference_im_name))
-  pRelativePose = subprocess.Popen( [os.path.join(OPENMVG_SFM_MINE_BIN, "relativePosePair_test"),  "--input_file",  localization_dir+"/sfm_data_expanded.json", "--reference_im_name", reference_im_name, "--query_im_name", query_im_name], shell=True,stdout = open(log_file,'a+') )
+  pRelativePose = subprocess.Popen( [os.path.join(OPENMVG_SFM_MINE_BIN, "relativePosePair_test"),  "--input_file",  localization_dir+"/sfm_data_expanded.json", "--reference_im_name", reference_im_name, "--query_im_name", query_im_name, "-o", log_file+'.json'], shell=True,stdout = open(log_file+'.txt','a+') )
   pRelativePose.wait()
+
+  return log_file+'.json'
 
 
 if __name__ == "__main__":
@@ -183,13 +185,13 @@ if __name__ == "__main__":
 
 
 
-  incremental_SfM_pipeline(dataset_dir, output_dir, K_value)
+  #incremental_SfM_pipeline(dataset_dir, output_dir, K_value)
   
 
   localization_pipeline(dataset_dir, output_dir, 
   "robust.bin",
   reference_im_name="1.jpg",
-  query_im_name="query_2.jpg"
+  query_im_name="query_4.jpg"
   )
 
 

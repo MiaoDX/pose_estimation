@@ -59,6 +59,40 @@ def test_camera_relocation_tweak_manaually():
             continue
 
 
+def test_only_two_images():
+    import traceback
+
+    K = np.array([[320, 0, 320], [0, 320, 240], [0, 0, 1]])    # unrealcv
+    d = np.array([0.0, 0.0, 0.0, 0.0, 0.0]).reshape(1, 5)
+
+    base_dir = "H:/projects/graduation_project_codebase/ACR/dataset/nine_scene/"
+    out_folder = "20170930_test"
+
+    # cameraRelocation = CameraRelocation(K, d, feature_name="BRIEF")
+
+    cameraRelocation = CameraRelocation(
+        K, d, feature_name="ORB", output_folder=out_folder)
+    cameraRelocation.set_feature_detector_descriptor_extractor(
+        "ORB", feature_detector_params=dict(nfeatures=2000))
+
+
+    strs = ['1_000', '1_000']
+
+    im1_file = base_dir + strs[0] + ".png"
+    print("Using {} as the reference image".format(im1_file))
+
+    cameraRelocation.load_image_left(im1_file)
+
+    im2_file = base_dir + strs[1] + ".png"
+    try:
+        print("Using {} as the testing image".format(im2_file))
+        cameraRelocation.forward(im2_file)
+    except:
+        print("Somthing went wrong when calc {} and {}".format(
+            im1_file, im2_file))
+        traceback.print_exc()
+
 if __name__ == '__main__':
 
-    test_camera_relocation_tweak_manaually()
+    #test_camera_relocation_tweak_manaually()
+    test_only_two_images()

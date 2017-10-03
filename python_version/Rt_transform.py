@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+from __future__ import division
+
 """
 Rotation Matrix <-> Euler angle
 
@@ -74,6 +77,7 @@ void Rotation::GetRPY(double& roll,double& pitch,double& yaw) const
 
 
 """
+
 
 import numpy as np
 

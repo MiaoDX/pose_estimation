@@ -15,6 +15,8 @@ using namespace openMVG::sfm;
 using namespace cv;
 using namespace Eigen;
 
+#include "json.hpp"
+using json = nlohmann::json;
 
 //#define TEST
 
@@ -40,14 +42,18 @@ int main()
 #else
 int main(int argc, char *argv[])
 {
+
+
   CmdLine cmd;
   std::string sSfM_Data_Filename;
   string reference_im_name = "reference.jpg";
   string query_im_name = "reference.jpg";
+  string output_json_file = "output.json";
 
   cmd.add( make_option('i', sSfM_Data_Filename, "input_file") );
   cmd.add ( make_option ( 'r', reference_im_name, "reference_im_name" ) );
   cmd.add ( make_option ( 'q', query_im_name, "query_im_name" ) );
+  cmd.add ( make_option ( 'o', output_json_file, "output_json file" ) );
 
   
 
@@ -57,9 +63,10 @@ int main(int argc, char *argv[])
   } catch (const std::string& s) {
       std::cerr << "Usage: " << argv[0] << '\n'
       << "[-i|--input_file] filename, the SfM_Data file to convert\n"
-          << "[-r|--reference_im_name] reference_im_name, the name of the image you want to use as reference\n"
-          << "[-q|--query_im_name] query_im_name, the name of image you want to use as query\n"
-      << std::endl;
+        << "[-r|--reference_im_name] reference_im_name, the name of the image you want to use as reference\n"
+        << "[-q|--query_im_name] query_im_name, the name of image you want to use as query\n"
+        << "[-o|--output_json_file - json file for the R,t]\n"
+        << std::endl;
 
       std::cerr << s << std::endl;
       return EXIT_FAILURE;
@@ -88,6 +95,32 @@ int main(int argc, char *argv[])
 
     
     pose2cmd ( val.second );
+
+
+    json j;
+    j["im1"] = reference_im_name;
+    j["im2"] = query_im_name;
+
+    //[https://stackoverflow.com/questions/8443102/convert-eigen-matrix-to-c-array](https://stackoverflow.com/a/40271252/7067150)
+    std::vector<double> rotation_vec ( 9 );
+    Eigen::Map<Eigen::MatrixXd> ( rotation_vec.data (), 3, 3 ) = val.second.rotation ();
+
+
+    Vec3 translation_Vec = val.second.translation ();
+    std::vector<double> translation_vec{ translation_Vec ( 0 ) , translation_Vec ( 1 ), translation_Vec ( 2 ) };
+
+
+    j["R"] = rotation_vec;
+    j["t"] = translation_vec;
+    
+
+    // write prettified JSON to another file
+    cout << "Going to save json to " << output_json_file << endl;
+    std::ofstream o ( output_json_file );
+    o << std::setw ( 4 ) << j << std::endl;
+    cout << "Save json done" << endl;
+
+
 
   return EXIT_SUCCESS;
 }
