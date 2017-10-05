@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
     //[https://stackoverflow.com/questions/8443102/convert-eigen-matrix-to-c-array](https://stackoverflow.com/a/40271252/7067150)
     std::vector<double> rotation_vec ( 9 );
-    Eigen::Map<Eigen::MatrixXd> ( rotation_vec.data (), 3, 3 ) = val.second.rotation ();
+    Eigen::Map<Eigen::MatrixXd> ( rotation_vec.data (), 3, 3 ) = val.second.rotation ().transpose();
 
 
     Vec3 translation_Vec = val.second.translation ();
