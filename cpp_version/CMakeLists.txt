@@ -31,6 +31,9 @@ message(STATUS "OpenCV_LIBS: ${OpenCV_LIBS}")
 set(GET_RT_ALGO ${CMAKE_SOURCE_DIR}/getRTAlgo)
 set(POSE_ESTIMATION ${CMAKE_SOURCE_DIR}/pose_estimation)
 
+# third party
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/third_party )
+
 # five points
 message(STATUS "fivePointLibDIR:${fivePointLibDIR}")
 include (${fivePointLibDIR}/lib/cmake/fivePoint/fivePointConfig.cmake)
@@ -58,6 +61,9 @@ target_link_libraries(perfectPoints ${LINK_LIBS})
 
 add_executable(pose_estimation_test pose_estimation_test.cpp ${ALL_NECESSARY_FILES})
 target_link_libraries(pose_estimation_test ${LINK_LIBS})
+
+add_executable(pose_estimation_test_standalone pose_estimation_test_standalone.cpp ${ALL_NECESSARY_FILES})
+target_link_libraries(pose_estimation_test_standalone ${LINK_LIBS})
 
 add_executable(Rt_transform_test ${POSE_ESTIMATION}/Rt_transform_test.cpp ${POSE_ESTIMATION}/Rt_transform.cpp)
 target_link_libraries(Rt_transform_test ${LINK_LIBS})
