@@ -67,7 +67,7 @@ int main(int argc,char **argv)
     //string featureName = "BRISK";
     //string featureName = "BRIEF";
     string featureName = "ORB";
-    //string featureName = "SIFT";
+    // string featureName = "SIFT";
 
 
     string imgname1 = im1;
@@ -90,7 +90,10 @@ int main(int argc,char **argv)
     vector<Point2f> points1, points2;
     kp2pts ( kpts1, kpts2, matches, points1, points2 );
     print_pts ( points1, points2, 0, 10 );
-    calculateRT_CV3 ( points1, points2, K, R, t );
+    //calculateRT_CV3 ( points1, points2, K, R, t );
+
+    calculateRT_5points ( points1, points2, K, R, t, 1000, true );
+
     DEBUG_RT ( R, t );
 
 
@@ -103,8 +106,10 @@ int main(int argc,char **argv)
     
     std::vector<double> K_vec ( 9 );
     
+    cout << "R:" << endl;
+    cout << R << endl;
 
-    j["R"] = getVector(R.t());
+    j["R"] = getVector(R); // transpose or not?
     j["t"] = getVector(t);
     //j["K"] = K_vec;
 

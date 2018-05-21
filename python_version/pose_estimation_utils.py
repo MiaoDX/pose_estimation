@@ -232,6 +232,21 @@ def points_pixel_to_camera(pts1, pts2, K_inv):
 
     return pts1_cam, pts2_cam
 
+"""
+cv::Point2d pixel2cam ( const cv::Point2d& p, const cv::Mat& K )
+{
+    return cv::Point2d
+    (
+        (p.x - K.at<double> ( 0, 2 )) / K.at<double> ( 0, 0 ),
+        (p.y - K.at<double> ( 1, 2 )) / K.at<double> ( 1, 1 )
+    );
+}
+"""
+def pixel2cam(p, K):
+    x = (p[0]-K[0, 2])/K[0, 0]
+    y = (p[1]-K[1, 2])/K[1, 1]
+    return x, y
+
 
 def recoverPose_from_E_cv2(E, kps1, kps2, matches, K):
     assert E is not None and kps1 is not None and kps2 is not None and matches is not None and K is not None
@@ -279,3 +294,25 @@ def find_F_from_E_and_K(E, K):
 
 def find_E_from_F_and_K(F, K):
     return K.T.dot(F).dot(K)
+
+
+if __name__ == '__main__':
+    np.random.seed(42)
+    pts1 = np.random.rand(3, 2)*20
+    pts2 = np.random.rand(3, 2)
+    print(pts1)
+
+    K = np.asarray([320, 0, 320, 0, 320, 240, 0, 0, 1]).reshape(3, 3)
+    K_inv = np.linalg.inv(K)
+
+    pts1_cam, pts2_cam = points_pixel_to_camera(pts1, pts2, K_inv)
+    print(pts1_cam)
+    print(pts2_cam)
+
+    pts1_cam_again = []
+    for pt in pts1:
+        print(pt)
+        x,y = pixel2cam(pt, K)
+        pts1_cam_again.append([x, y, 1])
+
+    print(pts1_cam_again)

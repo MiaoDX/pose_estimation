@@ -108,6 +108,7 @@ if __name__ == "__main__":
 
     print(E.shape)
     print("E:\n{}".format(E))
+    print("NICE points:{}".format(len(index_E)))
 
     R, t = recoverPose_from_E_and_pts(E, pts1, pts2, K)
 
