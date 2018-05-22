@@ -15,8 +15,6 @@ So, I want to do extra experiments with different implements of 5-points and see
 
 # Some Notes
 
-## [Notes of Nghia_Ho](Notes_of_Nghia_Ho.md)
-
 ## [FeatureDetectorDescriptor](FeatureDetectorDescriptor.md)
 
 

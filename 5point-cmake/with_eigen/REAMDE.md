@@ -1,2 +1,0 @@
-
-The static DEBUG lib version (compiled Eigen in) unmeaning takes a long time to run, not so sure why. I failed to compile the example with separate CMakeLists.txt (crush my cmake), still not sure why.
