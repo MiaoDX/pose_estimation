@@ -67,3 +67,9 @@ target_link_libraries(pose_estimation_test_standalone ${LINK_LIBS})
 
 add_executable(Rt_transform_test ${POSE_ESTIMATION}/Rt_transform_test.cpp ${POSE_ESTIMATION}/Rt_transform.cpp)
 target_link_libraries(Rt_transform_test ${LINK_LIBS})
+
+
+# python binding
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/third_party/pybind11 )
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/python )
+
