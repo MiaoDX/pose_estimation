@@ -13,6 +13,9 @@ So, I want to do extra experiments with different implements of 5-points and see
 * Matlab `estimateEssentialMatrix`
 * [Nghia Ho., the one we use in our platform now, with the support by our long time usage](http://nghiaho.com/?p=1675)
 
+*UPDATE: 2018.11.26:* Add [`pose_definition`](pose_definition) for the definition of *POSE, R, t, C* used in OpenCV.
+
+
 # Some Notes
 
 ## [FeatureDetectorDescriptor](FeatureDetectorDescriptor.md)
